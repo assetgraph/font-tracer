@@ -1,0 +1,7 @@
+/node_modules/
+/coverage/
+.DS_Store
+/.nyc_output/
+/font-tracer.js
+/font-tracer.js.map
+/dist/
