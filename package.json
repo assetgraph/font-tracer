@@ -48,5 +48,10 @@
     "capitalize": "^2.0.0",
     "css-font-weight-names": "^0.2.1",
     "postcss-values-parser": "^2.0.1"
+  },
+  "nyc": {
+    "include": [
+      "lib/**"
+    ]
   }
 }
