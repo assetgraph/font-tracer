@@ -25,6 +25,7 @@
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^4.0.0",
     "sinon": "^7.2.4",
+    "unexpected": "^11.1.0",
     "unexpected-sinon": "^10.11.1",
     "webpack": "^4.16.1"
   },
