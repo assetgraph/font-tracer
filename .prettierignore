@@ -1,6 +1,7 @@
 /testdata/
 /node_modules/
 /coverage/
+/dist/
 
 # Don't fight npm install --save
 /package.json
