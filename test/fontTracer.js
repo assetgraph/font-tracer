@@ -2,7 +2,6 @@ const pathModule = require('path');
 const expect = require('unexpected').clone();
 const AssetGraph = require('assetgraph');
 const fontTracer = require('../lib/fontTracer');
-// FIXME
 const gatherStylesheetsWithPredicates = require('assetgraph/lib/util/fonts/gatherStylesheetsWithPredicates');
 const getCssRulesByProperty = require('assetgraph/lib/util/fonts/getCssRulesByProperty');
 
