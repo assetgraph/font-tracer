@@ -4,6 +4,7 @@ const AssetGraph = require('assetgraph');
 const fontTracer = require('../lib/fontTracer');
 // FIXME
 const gatherStylesheetsWithPredicates = require('assetgraph/lib/util/fonts/gatherStylesheetsWithPredicates');
+const getCssRulesByProperty = require('assetgraph/lib/util/fonts/getCssRulesByProperty');
 
 expect.addAssertion(
   '<string> to [exhaustively] satisfy computed font properties <array>',
@@ -24,6 +25,7 @@ expect.addAssertion(
       fontTracer(
         htmlAsset.parseTree,
         gatherStylesheetsWithPredicates(htmlAsset.assetGraph, htmlAsset),
+        getCssRulesByProperty,
         htmlAsset
       ),
       'to [exhaustively] satisfy',
@@ -2860,6 +2862,7 @@ describe('fontTracer', function() {
         fontTracer(
           htmlAsset.parseTree,
           gatherStylesheetsWithPredicates(htmlAsset.assetGraph, htmlAsset),
+          getCssRulesByProperty,
           htmlAsset
         ),
         'to exhaustively satisfy',
