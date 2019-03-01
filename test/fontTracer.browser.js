@@ -7,9 +7,10 @@ describe('fontTracer.browser', function() {
   it('should trace a test case', async function() {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    const messages = [];
-    page.on('console', async msg =>
-      messages.push(...(await Promise.all(msg.args().map(a => a.jsonValue()))))
+    const resultPromise = new Promise(resolve =>
+      page.on('console', msg =>
+        resolve(Promise.all(msg.args().map(a => a.jsonValue())))
+      )
     );
     const fileName = pathModule.resolve(
       __dirname,
@@ -35,8 +36,9 @@ describe('fontTracer.browser', function() {
     await page.addScriptTag({
       content: 'console.log(fontTracer(document));'
     });
+    const result = await resultPromise;
     await browser.close();
-    expect(messages, 'to equal', [
+    expect(result, 'to equal', [
       [
         {
           text: 'foo',
