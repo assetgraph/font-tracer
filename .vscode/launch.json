@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Test suite",
+      "program": "${workspaceFolder}/node_modules/.bin/_mocha",
+      "args": ["--timeout", "1000000000"],
+      "skipFiles": [
+        "<node_internals>/**" // Prevent stepping through async_hooks.js et al.
+      ]
+    }
+  ]
+}
