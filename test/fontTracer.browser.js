@@ -38,9 +38,10 @@ describe('fontTracer.browser', function() {
     });
     const result = await resultPromise;
     await browser.close();
-    expect(result, 'to equal', [
+    expect(result, 'to satisfy', [
       [
         {
+          node: expect.it('to be an object'),
           text: 'foo',
           props: { 'font-style': 'normal', 'font-weight': '500' }
         },
