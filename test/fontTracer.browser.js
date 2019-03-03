@@ -1,3 +1,4 @@
+/* global fontTracer */
 const puppeteer = require('puppeteer');
 const expect = require('unexpected');
 const urlTools = require('urltools');
@@ -7,11 +8,6 @@ describe('fontTracer.browser', function() {
   it('should trace a test case', async function() {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    const resultPromise = new Promise(resolve =>
-      page.on('console', msg =>
-        resolve(Promise.all(msg.args().map(a => a.jsonValue())))
-      )
-    );
     const fileName = pathModule.resolve(
       __dirname,
       '..',
@@ -33,27 +29,23 @@ describe('fontTracer.browser', function() {
         )
       )
     });
-    await page.addScriptTag({
-      content: 'console.log(fontTracer(document));'
-    });
-    const result = await resultPromise;
-    await browser.close();
+    const result = await page.evaluate(() => fontTracer(document));
     expect(result, 'to satisfy', [
-      [
-        {
-          node: expect.it('to be an object'),
-          text: 'foo',
-          props: { 'font-style': 'normal', 'font-weight': '500' }
-        },
-        {
-          text: '        ',
-          props: { 'font-style': 'normal', 'font-weight': 'normal' }
-        },
-        {
-          text: ' ',
-          props: { 'font-style': 'normal', 'font-weight': 'normal' }
-        }
-      ]
+      {
+        node: expect.it('to be an object'),
+        text: 'foo',
+        props: { 'font-style': 'normal', 'font-weight': '500' }
+      },
+      {
+        text: '        ',
+        props: { 'font-style': 'normal', 'font-weight': 'normal' }
+      },
+      {
+        text: ' ',
+        props: { 'font-style': 'normal', 'font-weight': 'normal' }
+      }
     ]);
+
+    await browser.close();
   });
 });
