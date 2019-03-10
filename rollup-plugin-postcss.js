@@ -6,12 +6,21 @@ const webpack = require('webpack');
 const MemoryFS = require('memory-fs');
 
 const postcss = require.resolve('postcss');
+const postcssValuesParser = require.resolve('postcss-values-parser');
 
 module.exports = () => ({
   name: 'rollup-plugin-postcss',
 
   load(id) {
-    if (id !== postcss) {
+    let filename;
+    let library;
+    if (id === postcss) {
+      filename = 'postcss.js';
+      library = 'postcss';
+    } else if (id === postcssValuesParser) {
+      filename = 'postcssValuesParser.js';
+      library = 'postcss-values-parser';
+    } else {
       return null;
     }
 
@@ -21,8 +30,8 @@ module.exports = () => ({
 
       output: {
         path: __dirname,
-        filename: 'postcss.js',
-        library: 'postcss',
+        filename,
+        library,
         libraryTarget: 'commonjs2'
       }
     });
@@ -43,7 +52,7 @@ module.exports = () => ({
         }
 
         return resolve({
-          code: memfs.readFileSync(path.join(__dirname, './postcss.js'), 'utf8')
+          code: memfs.readFileSync(path.join(__dirname, filename), 'utf8')
 
           // TODO: figure out source map
         });
