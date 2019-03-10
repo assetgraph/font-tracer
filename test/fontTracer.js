@@ -168,6 +168,19 @@ describe('fontTracer', function() {
     );
   });
 
+  it('should exclude text in display:none elements', function() {
+    var htmlText = [
+      '<style>div { display: none; }</style>',
+      '<div>div</div>'
+    ].join('');
+
+    return expect(
+      htmlText,
+      'to exhaustively satisfy computed font properties',
+      []
+    );
+  });
+
   it('should apply default browser styles', function() {
     var htmlText = ['<div>div</div><strong>strong</strong><em>em</em>'].join(
       '\n'
