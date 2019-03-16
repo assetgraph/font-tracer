@@ -1,5 +1,8 @@
 const pathModule = require('path');
-const expect = require('unexpected').clone();
+const expect = require('unexpected')
+  .clone()
+  .use(require('unexpected-dom'))
+  .use(require('magicpen-prism'));
 const AssetGraph = require('assetgraph');
 const fontTracer = require('../lib/fontTracer');
 const gatherStylesheetsWithPredicates = require('assetgraph/lib/util/fonts/gatherStylesheetsWithPredicates');
@@ -20,70 +23,71 @@ expect.addAssertion(
 
     await assetGraph.populate({ followRelations: { crossorigin: false } });
 
-    expect(
-      fontTracer(
-        htmlAsset.parseTree,
-        gatherStylesheetsWithPredicates(htmlAsset.assetGraph, htmlAsset),
-        getCssRulesByProperty,
-        htmlAsset
-      ),
-      'to [exhaustively] satisfy',
-      result
+    const traces = fontTracer(
+      htmlAsset.parseTree,
+      gatherStylesheetsWithPredicates(htmlAsset.assetGraph, htmlAsset),
+      getCssRulesByProperty,
+      htmlAsset
     );
+
+    expect(traces, 'to [exhaustively] satisfy', result);
   }
 );
 
 describe('fontTracer', function() {
+  it('should include reference back to the original node', function() {
+    return expect('<div>foo</div>', 'to satisfy computed font properties', [
+      {
+        text: 'foo',
+        node: {
+          name: 'div'
+        }
+      }
+    ]);
+  });
+
   it('should strip empty text nodes', function() {
     var htmlText = ['  <div>div</div>   <span></span>  '].join('');
 
-    return expect(
-      htmlText,
-      'to exhaustively satisfy computed font properties',
-      [
-        {
-          text: 'div',
-          props: {
-            'font-family': undefined,
-            'font-weight': 'normal',
-            'font-style': 'normal'
-          }
-        },
-        {
-          text: '       ',
-          props: {
-            'font-family': undefined,
-            'font-style': 'normal',
-            'font-weight': 'normal'
-          }
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'div',
+        props: {
+          'font-family': undefined,
+          'font-weight': 'normal',
+          'font-style': 'normal'
         }
-      ]
-    );
+      },
+      {
+        text: '       ',
+        props: {
+          'font-family': undefined,
+          'font-style': 'normal',
+          'font-weight': 'normal'
+        }
+      }
+    ]);
   });
 
   it('should skip template language placeholders', function() {
     var htmlText = '<div>foo <?bar?> quux</div>';
 
-    return expect(
-      htmlText,
-      'to exhaustively satisfy computed font properties',
-      [
-        {
-          text: 'foo  quux',
-          props: {
-            'font-family': undefined,
-            'font-weight': 'normal',
-            'font-style': 'normal'
-          }
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'foo  quux',
+        props: {
+          'font-family': undefined,
+          'font-weight': 'normal',
+          'font-style': 'normal'
         }
-      ]
-    );
+      }
+    ]);
   });
 
   it('should include whitespace', async function() {
     await expect(
       '<h2><span>foo</span> </h2>',
-      'to exhaustively satisfy computed font properties',
+      'to satisfy computed font properties',
       [
         {
           text: 'foo',
@@ -108,20 +112,16 @@ describe('fontTracer', function() {
   it('should apply inline style attribute values', function() {
     var htmlText = ['<div style="font-weight: bold">div</div>'].join('');
 
-    return expect(
-      htmlText,
-      'to exhaustively satisfy computed font properties',
-      [
-        {
-          text: 'div',
-          props: {
-            'font-family': undefined,
-            'font-weight': 'bold',
-            'font-style': 'normal'
-          }
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'div',
+        props: {
+          'font-family': undefined,
+          'font-weight': 'bold',
+          'font-style': 'normal'
         }
-      ]
-    );
+      }
+    ]);
   });
 
   it('should match CSS property names case insensitively', function() {
@@ -130,20 +130,16 @@ describe('fontTracer', function() {
       '<div style="FONT-style: italic;">div</div>'
     ].join('');
 
-    return expect(
-      htmlText,
-      'to exhaustively satisfy computed font properties',
-      [
-        {
-          text: 'div',
-          props: {
-            'font-family': 'foo',
-            'font-weight': 'bold',
-            'font-style': 'italic'
-          }
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'div',
+        props: {
+          'font-family': 'foo',
+          'font-weight': 'bold',
+          'font-style': 'italic'
         }
-      ]
-    );
+      }
+    ]);
   });
 
   it('should apply stylesheet attribute values', function() {
@@ -152,20 +148,16 @@ describe('fontTracer', function() {
       '<div>div</div>'
     ].join('');
 
-    return expect(
-      htmlText,
-      'to exhaustively satisfy computed font properties',
-      [
-        {
-          text: 'div',
-          props: {
-            'font-family': undefined,
-            'font-weight': 'bold',
-            'font-style': 'normal'
-          }
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'div',
+        props: {
+          'font-family': undefined,
+          'font-weight': 'bold',
+          'font-style': 'normal'
         }
-      ]
-    );
+      }
+    ]);
   });
 
   it('should exclude text in display:none elements', function() {
@@ -186,44 +178,40 @@ describe('fontTracer', function() {
       '\n'
     );
 
-    return expect(
-      htmlText,
-      'to exhaustively satisfy computed font properties',
-      [
-        {
-          text: 'div',
-          props: {
-            'font-family': undefined,
-            'font-weight': 'normal',
-            'font-style': 'normal'
-          }
-        },
-        {
-          text: 'strong',
-          props: {
-            'font-family': undefined,
-            'font-weight': 'normal+bolder',
-            'font-style': 'normal'
-          }
-        },
-        {
-          text: 'strong',
-          props: {
-            'font-family': undefined,
-            'font-weight': 'bold',
-            'font-style': 'normal'
-          }
-        },
-        {
-          text: 'em',
-          props: {
-            'font-family': undefined,
-            'font-weight': 'normal',
-            'font-style': 'italic'
-          }
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'div',
+        props: {
+          'font-family': undefined,
+          'font-weight': 'normal',
+          'font-style': 'normal'
         }
-      ]
-    );
+      },
+      {
+        text: 'strong',
+        props: {
+          'font-family': undefined,
+          'font-weight': 'normal+bolder',
+          'font-style': 'normal'
+        }
+      },
+      {
+        text: 'strong',
+        props: {
+          'font-family': undefined,
+          'font-weight': 'bold',
+          'font-style': 'normal'
+        }
+      },
+      {
+        text: 'em',
+        props: {
+          'font-family': undefined,
+          'font-weight': 'normal',
+          'font-style': 'italic'
+        }
+      }
+    ]);
   });
 
   it('should trace a single quoted font-family', function() {
@@ -232,20 +220,16 @@ describe('fontTracer', function() {
       'text'
     ].join('');
 
-    return expect(
-      htmlText,
-      'to exhaustively satisfy computed font properties',
-      [
-        {
-          text: 'text',
-          props: {
-            'font-family': "'font 1'",
-            'font-weight': 'normal',
-            'font-style': 'normal'
-          }
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'text',
+        props: {
+          'font-family': "'font 1'",
+          'font-weight': 'normal',
+          'font-style': 'normal'
         }
-      ]
-    );
+      }
+    ]);
   });
 
   it('should trace a double quoted font-family', function() {
@@ -254,39 +238,31 @@ describe('fontTracer', function() {
       'text'
     ].join('');
 
-    return expect(
-      htmlText,
-      'to exhaustively satisfy computed font properties',
-      [
-        {
-          text: 'text',
-          props: {
-            'font-family': '"font 1"',
-            'font-weight': 'normal',
-            'font-style': 'normal'
-          }
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'text',
+        props: {
+          'font-family': '"font 1"',
+          'font-weight': 'normal',
+          'font-style': 'normal'
         }
-      ]
-    );
+      }
+    ]);
   });
 
   it('should return font-weight as a string', function() {
     var htmlText = '<style>body { font-weight: 500; }</style>text';
 
-    return expect(
-      htmlText,
-      'to exhaustively satisfy computed font properties',
-      [
-        {
-          text: 'text',
-          props: {
-            'font-family': undefined,
-            'font-weight': '500',
-            'font-style': 'normal'
-          }
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'text',
+        props: {
+          'font-family': undefined,
+          'font-weight': '500',
+          'font-style': 'normal'
         }
-      ]
-    );
+      }
+    ]);
   });
 
   describe('specificity', function() {
@@ -296,20 +272,16 @@ describe('fontTracer', function() {
         '<h1>h1</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'h1',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'h1',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('style attributes should override stylesheets', function() {
@@ -318,20 +290,16 @@ describe('fontTracer', function() {
         '<div style="font-weight: normal">div</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'div',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'div',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('redefined properties in the same rule should override previous ones', function() {
@@ -340,20 +308,16 @@ describe('fontTracer', function() {
         '<div>div</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'div',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'light',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'div',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'light',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('higher specificity selectors should override lower ones', function() {
@@ -362,20 +326,16 @@ describe('fontTracer', function() {
         '<div class="all">div</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'div',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'light',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'div',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'light',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('last selector of equal specificity should override previous ones', function() {
@@ -384,20 +344,16 @@ describe('fontTracer', function() {
         '<div>div</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'div',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'div',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('!important should override specificity in stylesheets', function() {
@@ -406,20 +362,16 @@ describe('fontTracer', function() {
         '<div class="all">div</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'div',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'div',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('!important in stylesheet should override style attribute', function() {
@@ -428,20 +380,16 @@ describe('fontTracer', function() {
         '<div style="font-weight: light">div</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'div',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'div',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('!important in style attribute should override !important in stylesheet', function() {
@@ -450,20 +398,16 @@ describe('fontTracer', function() {
         '<div style="font-weight: light !important">div</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'div',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'light',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'div',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'light',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
   });
 
@@ -474,28 +418,24 @@ describe('fontTracer', function() {
         '<h1>foo <span>bar</span></h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'bar',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo ',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'bar',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo ',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'bold',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('default non-inheritance form elements should not inherit styles from parents', function() {
@@ -622,20 +562,16 @@ describe('fontTracer', function() {
         '<div class="all"><span>span</span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
   });
 
@@ -646,20 +582,16 @@ describe('fontTracer', function() {
         '<div><span>span</span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal+lighter',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal+lighter',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('should return inherited value with `lighter` modification', function() {
@@ -669,20 +601,16 @@ describe('fontTracer', function() {
         '<div><span>span</span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '600+lighter',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '600+lighter',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('should return multiple hypothetical inherited values with `lighter` modification', function() {
@@ -693,28 +621,24 @@ describe('fontTracer', function() {
         '<div><span>span</span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '800+lighter',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '600+lighter',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '800+lighter',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '600+lighter',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should return inherited value with multiple `lighter` modifications', function() {
@@ -724,20 +648,16 @@ describe('fontTracer', function() {
         '<div><span><span>span</span></span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '900+lighter+lighter',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '900+lighter+lighter',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
   });
 
@@ -748,20 +668,16 @@ describe('fontTracer', function() {
         '<div><span>span</span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal+bolder',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal+bolder',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('should return inherited value with `bolder` modification', function() {
@@ -771,20 +687,16 @@ describe('fontTracer', function() {
         '<div><span>span</span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '600+bolder',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '600+bolder',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('should return multiple hypothetical inherited values with `bolder` modification', function() {
@@ -795,28 +707,24 @@ describe('fontTracer', function() {
         '<div><span>span</span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '800+bolder',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '600+bolder',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '800+bolder',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '600+bolder',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should return inherited value with multiple `bolder` modifications', function() {
@@ -826,20 +734,16 @@ describe('fontTracer', function() {
         '<div><span><span>span</span></span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '200+bolder+bolder',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '200+bolder+bolder',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
   });
 
@@ -852,20 +756,16 @@ describe('fontTracer', function() {
         '<div><span><span class="inner">span</span></span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '200+bolder+lighter',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '200+bolder+lighter',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('should return inherited value with `lighter` and `bolder` modification', function() {
@@ -876,20 +776,16 @@ describe('fontTracer', function() {
         '<div><span><span class="inner">span</span></span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '200+lighter+bolder',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '200+lighter+bolder',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('should handle `lighter` with a pseudo class', function() {
@@ -900,28 +796,24 @@ describe('fontTracer', function() {
         '<div><span><span class="inner">span</span></span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '200+lighter+bolder',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'span',
-            props: {
-              'font-family': undefined,
-              'font-weight': '200+lighter+lighter',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '200+lighter+bolder',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'span',
+          props: {
+            'font-family': undefined,
+            'font-weight': '200+lighter+lighter',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
   });
 
@@ -1027,59 +919,65 @@ describe('fontTracer', function() {
       '<h1>foo <span>bar</span></h1>'
     ].join('');
 
-    return expect(
-      htmlText,
-      'to exhaustively satisfy computed font properties',
-      [
-        {
-          text: 'bar',
-          props: {
-            'font-family': 'font2',
-            'font-weight': 'bold',
-            'font-style': 'normal'
-          }
-        },
-        {
-          text: 'foo ',
-          props: {
-            'font-family': 'font1',
-            'font-weight': 'bold',
-            'font-style': 'normal'
-          }
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'bar',
+        props: {
+          'font-family': 'font2',
+          'font-weight': 'bold',
+          'font-style': 'normal'
         }
-      ]
-    );
+      },
+      {
+        text: 'foo ',
+        props: {
+          'font-family': 'font1',
+          'font-weight': 'bold',
+          'font-style': 'normal'
+        }
+      }
+    ]);
   });
 
   describe('CSS pseudo elements', function() {
+    it('should include the pseudo element name', function() {
+      var htmlText = [
+        '<style>h1:after { content: "thecontent"; font-family: font1 !important; }</style>',
+        '<h1></h1>'
+      ].join('');
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'thecontent',
+          pseudoElementName: 'after'
+        }
+      ]);
+    });
+
     it('should pick up distinct styles on :after pseudo-element', function() {
       var htmlText = [
         '<style>h1:after { content: "after"; font-family: font1 !important; }</style>',
         '<h1>h1</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'h1',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'after',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'h1',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'after',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'bold',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should support an ::after selector without anything else', function() {
@@ -1088,20 +986,16 @@ describe('fontTracer', function() {
         '<div></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'after',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'after',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('should support :after without content', function() {
@@ -1110,11 +1004,7 @@ describe('fontTracer', function() {
         '<h1></h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        []
-      );
+      return expect(htmlText, 'to satisfy computed font properties', []);
     });
 
     it('should not inherit the content property', function() {
@@ -1124,11 +1014,7 @@ describe('fontTracer', function() {
         '<h1></h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        []
-      );
+      return expect(htmlText, 'to satisfy computed font properties', []);
     });
 
     describe('with quotes', function() {
@@ -1139,20 +1025,16 @@ describe('fontTracer', function() {
           '<div></div>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: '<',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: '<',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          }
+        ]);
       });
 
       it('should include all end quote characters when close-quote is part of the content value', function() {
@@ -1162,20 +1044,16 @@ describe('fontTracer', function() {
           '<div></div>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: '>]',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: '>]',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          }
+        ]);
       });
 
       it('should handle hypothetical values of quotes', function() {
@@ -1186,55 +1064,47 @@ describe('fontTracer', function() {
           '<div></div>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: '(',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '<',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: '(',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: '<',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          }
+        ]);
       });
 
       it('should assume a conservative set of the most common quote characters when the quotes property is not explicitly given', function() {
         var htmlText = ['<q></q>'].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: '«‹‘\'"',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '»›’\'"',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: '«‹‘\'"',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: '»›’\'"',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          }
+        ]);
       });
     });
 
@@ -1245,28 +1115,24 @@ describe('fontTracer', function() {
         '<h1>h1</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'h1',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'after',
-            props: {
-              'font-family': 'font2',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'h1',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'after',
+          props: {
+            'font-family': 'font2',
+            'font-weight': 'bold',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should take !important into account when re-defining prop on :after pseudo-element', function() {
@@ -1276,28 +1142,24 @@ describe('fontTracer', function() {
         '<h1>h1</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'h1',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'after',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'h1',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'after',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'bold',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should pick up multiple :after pseudo-elements', function() {
@@ -1307,28 +1169,24 @@ describe('fontTracer', function() {
         '<h1>h1</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'h1',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'after',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'h1',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'after',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'bold',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should inherit from each distinct pseudo parent', function() {
@@ -1340,44 +1198,40 @@ describe('fontTracer', function() {
         '<article class="foo">article</atricle>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'p',
-            props: {
-              'font-family': undefined,
-              'font-weight': '200',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'after',
-            props: {
-              'font-family': 'font1',
-              'font-weight': '200',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'article',
-            props: {
-              'font-family': undefined,
-              'font-weight': '600',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'after',
-            props: {
-              'font-family': 'font1',
-              'font-weight': '600',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'p',
+          props: {
+            'font-family': undefined,
+            'font-weight': '200',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'after',
+          props: {
+            'font-family': 'font1',
+            'font-weight': '200',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'article',
+          props: {
+            'font-family': undefined,
+            'font-weight': '600',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'after',
+          props: {
+            'font-family': 'font1',
+            'font-weight': '600',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should support content: attr(...)', function() {
@@ -1386,20 +1240,16 @@ describe('fontTracer', function() {
         '<div data-foo="bar"></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'bar',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'bar',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('should support content: counter() with an explicit list-style', function() {
@@ -1412,28 +1262,24 @@ describe('fontTracer', function() {
         '</body></html>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'I',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'I',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     describe('with content: counters()', function() {
@@ -1447,20 +1293,16 @@ describe('fontTracer', function() {
           '</body></html>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: '1.',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: '1.',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          }
+        ]);
       });
 
       it('should support the 3 argument form with a built-in counter-style', function() {
@@ -1473,20 +1315,16 @@ describe('fontTracer', function() {
           '</body></html>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'I.',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'I.',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          }
+        ]);
       });
 
       it('should support the 3 argument form with a custom @counter-style', function() {
@@ -1500,20 +1338,16 @@ describe('fontTracer', function() {
           '</body>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'Ⓐ.',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'Ⓐ.',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          }
+        ]);
       });
 
       it('should support the 3 argument form with a custom @counter-style that references other counters', function() {
@@ -1524,20 +1358,16 @@ describe('fontTracer', function() {
           '<div></div>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: '0.',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: '0.',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          }
+        ]);
       });
 
       it('should support the 3 argument form with a custom @counter-style that references a chain of other counters', function() {
@@ -1549,20 +1379,16 @@ describe('fontTracer', function() {
           '<div></div>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: '0.',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: '0.',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          }
+        ]);
       });
     });
 
@@ -1574,28 +1400,24 @@ describe('fontTracer', function() {
           '<div>foo</div>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'Ⓐ',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'foo',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'Ⓐ',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: 'foo',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          }
+        ]);
       });
 
       it('should support the full syntax of the symbols property', function() {
@@ -1605,68 +1427,64 @@ describe('fontTracer', function() {
           '<ol><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ol>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'a',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'b',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'c',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'd',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '"',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: "'",
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '7',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'a',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: 'b',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'c',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'd',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: '"',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: "'",
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: '7',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          }
+        ]);
       });
 
       it('should pick up the text from all @counter-style properties', function() {
@@ -1676,20 +1494,16 @@ describe('fontTracer', function() {
           '<ol><li></li></ol>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'pⒶsq',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'pⒶsq',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          }
+        ]);
       });
 
       it('should utilize the fallback counter', function() {
@@ -1699,36 +1513,32 @@ describe('fontTracer', function() {
           '<div>foo</div><div></div>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'Ⓐ',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'foo',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'II',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'Ⓐ',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: 'foo',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'II',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          }
+        ]);
       });
 
       it('should trace conditional @counter-style declarations', function() {
@@ -1739,28 +1549,24 @@ describe('fontTracer', function() {
           '<ol><li></li></ol>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'Ⓐ',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'Ⓓ',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'Ⓐ',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: 'Ⓓ',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          }
+        ]);
       });
 
       it('should exclude impossible combinations when tracing conditional @counter-style declarations', function() {
@@ -1772,38 +1578,34 @@ describe('fontTracer', function() {
           '<ol><li></li></ol>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            // Would be nice to avoid this first one, since all the @media 3dglasses {...} will
-            // kick in together, but that would require a more advanced predicate handling:
-            {
-              text: 'Ⓐ',
-              props: {
-                'font-family': 'font2',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'Ⓓ',
-              props: {
-                'font-family': 'font2',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'Ⓐ',
-              props: {
-                'font-family': 'font1',
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          // Would be nice to avoid this first one, since all the @media 3dglasses {...} will
+          // kick in together, but that would require a more advanced predicate handling:
+          {
+            text: 'Ⓐ',
+            props: {
+              'font-family': 'font2',
+              'font-weight': 'normal',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: 'Ⓓ',
+            props: {
+              'font-family': 'font2',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'Ⓐ',
+            props: {
+              'font-family': 'font1',
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          }
+        ]);
       });
 
       describe('and counter-increment', function() {
@@ -1821,36 +1623,32 @@ describe('fontTracer', function() {
             '</body></html>'
           ].join('');
 
-          return expect(
-            htmlText,
-            'to exhaustively satisfy computed font properties',
-            [
-              {
-                text: 'Ⓓ',
-                props: {
-                  'font-family': 'font1',
-                  'font-weight': 'normal',
-                  'font-style': 'normal'
-                }
-              },
-              {
-                text: 'Ⓕ',
-                props: {
-                  'font-family': 'font1',
-                  'font-weight': 'normal',
-                  'font-style': 'normal'
-                }
-              },
-              {
-                text: 'VIII',
-                props: {
-                  'font-family': 'font1',
-                  'font-weight': 'normal',
-                  'font-style': 'normal'
-                }
+          return expect(htmlText, 'to satisfy computed font properties', [
+            {
+              text: 'Ⓓ',
+              props: {
+                'font-family': 'font1',
+                'font-weight': 'normal',
+                'font-style': 'normal'
               }
-            ]
-          );
+            },
+            {
+              text: 'Ⓕ',
+              props: {
+                'font-family': 'font1',
+                'font-weight': 'normal',
+                'font-style': 'normal'
+              }
+            },
+            {
+              text: 'VIII',
+              props: {
+                'font-family': 'font1',
+                'font-weight': 'normal',
+                'font-style': 'normal'
+              }
+            }
+          ]);
         });
       });
     });
@@ -1861,20 +1659,16 @@ describe('fontTracer', function() {
         '<div data-foo="bar"></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'bazbaryadda',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'bazbaryadda',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('should apply inherited pseudo-element properties from lower specificity selectors', function() {
@@ -1887,44 +1681,40 @@ describe('fontTracer', function() {
         '<div >text</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'text',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': '"myClass"',
-              'font-weight': '900',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': '"myClass"',
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'text',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': '"myClass"',
+            'font-weight': '900',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': '"myClass"',
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should support a combination of pseudo elements and media queries', function() {
@@ -1934,36 +1724,32 @@ describe('fontTracer', function() {
         '<h1>h1</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'h1',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'h1',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'bold',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'bold',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should not confuse :before and :after properties', function() {
@@ -1973,36 +1759,32 @@ describe('fontTracer', function() {
         '<h1 class="after">h1</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'before',
-            props: {
-              'font-family': 'font2',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'h1',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'after',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'before',
+          props: {
+            'font-family': 'font2',
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'h1',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'after',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'bold',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     describe('with ::first-letter', function() {
@@ -2320,28 +2102,24 @@ describe('fontTracer', function() {
     it('should include the default list indicators in the subset', function() {
       var htmlText = ['<ol><li>foo</li></ol>'].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: '1.',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: '1.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should include the indicators when display:list-item and list-style-type are applied to an element', function() {
@@ -2350,28 +2128,24 @@ describe('fontTracer', function() {
         '<div>foo</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'I.',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'I.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should recognize "display: list-item block;" as a list item', function() {
@@ -2380,28 +2154,24 @@ describe('fontTracer', function() {
         '<div>foo</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'I.',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'I.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should support list-style-type provided as a string', function() {
@@ -2410,28 +2180,24 @@ describe('fontTracer', function() {
         '<div>foo</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'yeah',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'yeah',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should include the indicators when display:list-item and list-style are applied to an element', function() {
@@ -2440,28 +2206,24 @@ describe('fontTracer', function() {
         '<div>foo</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'I.',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'I.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should include the indicators even with the display:list-item does not have text', function() {
@@ -2470,20 +2232,16 @@ describe('fontTracer', function() {
         '<div></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'I.',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'I.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('should combine with conditionals', function() {
@@ -2493,36 +2251,32 @@ describe('fontTracer', function() {
         '<li>Hello</li>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'I.',
-            props: {
-              'font-family': undefined,
-              'font-weight': '400',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: '1.',
-            props: {
-              'font-family': undefined,
-              'font-weight': '400',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'Hello',
-            props: {
-              'font-family': undefined,
-              'font-weight': '400',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'I.',
+          props: {
+            'font-family': undefined,
+            'font-weight': '400',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: '1.',
+          props: {
+            'font-family': undefined,
+            'font-weight': '400',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'Hello',
+          props: {
+            'font-family': undefined,
+            'font-weight': '400',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should account for all possible list item numbers when one of the preceding items has a varying display', function() {
@@ -2532,44 +2286,40 @@ describe('fontTracer', function() {
         '<ol><li></li><li class="foo"></li><li></li><li></li></ol>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: '1.',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: '2.',
-            props: {
-              'font-family': undefined,
-              'font-weight': '700',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: '2.3.',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: '3.4.',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: '1.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: '2.',
+          props: {
+            'font-family': undefined,
+            'font-weight': '700',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: '2.3.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: '3.4.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
   });
 
@@ -2580,36 +2330,32 @@ describe('fontTracer', function() {
         '<div>foo<span>bar</span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'bar',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'bar',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should multiply the styles when a pseudo class matches', function() {
@@ -2618,28 +2364,24 @@ describe('fontTracer', function() {
         '<div>foo</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should inherit non-pseudo class values from the non-pseudo node', function() {
@@ -2648,28 +2390,24 @@ describe('fontTracer', function() {
         '<div>foo</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-family': 'font1',
-              'font-weight': '500',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': 'font1',
-              'font-weight': '400',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': 'font1',
+            'font-weight': '500',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': 'font1',
+            'font-weight': '400',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should multiply pseudo class properties to children', function() {
@@ -2678,44 +2416,40 @@ describe('fontTracer', function() {
         '<div>foo<span>bar</span></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'bar',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': 'font1',
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'bar',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': 'font1',
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
   });
 
@@ -2726,28 +2460,24 @@ describe('fontTracer', function() {
         '<div>foo</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-family': 'font1',
-              'font-weight': '500',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': 'font1',
-              'font-weight': '400',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': 'font1',
+            'font-weight': '500',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': 'font1',
+            'font-weight': '400',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should include the possibility of a media attribute matching or not matching', function() {
@@ -2757,28 +2487,24 @@ describe('fontTracer', function() {
         '<div>foo</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-family': 'font2',
-              'font-weight': '800',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': 'font1',
-              'font-weight': '400',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': 'font2',
+            'font-weight': '800',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': 'font1',
+            'font-weight': '400',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should trace two levels of media queries when a media attribute is present and the referenced stylesheet contains a @media rule', function() {
@@ -2788,36 +2514,32 @@ describe('fontTracer', function() {
         '<div>foo</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-style': 'normal',
-              'font-weight': '800',
-              'font-family': 'font2'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-style': 'normal',
-              'font-weight': '500',
-              'font-family': 'font2'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-style': 'normal',
-              'font-weight': '400',
-              'font-family': 'font1'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-style': 'normal',
+            'font-weight': '800',
+            'font-family': 'font2'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-style': 'normal',
+            'font-weight': '500',
+            'font-family': 'font2'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-style': 'normal',
+            'font-weight': '400',
+            'font-family': 'font1'
+          }
+        }
+      ]);
     });
 
     it('should support nested @media queries', function() {
@@ -2827,36 +2549,32 @@ describe('fontTracer', function() {
         '<div>foo</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-style': 'normal',
-              'font-weight': '800',
-              'font-family': 'font2'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-style': 'normal',
-              'font-weight': '500',
-              'font-family': 'font2'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-style': 'normal',
-              'font-weight': '400',
-              'font-family': 'font1'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-style': 'normal',
+            'font-weight': '800',
+            'font-family': 'font2'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-style': 'normal',
+            'font-weight': '500',
+            'font-family': 'font2'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-style': 'normal',
+            'font-weight': '400',
+            'font-family': 'font1'
+          }
+        }
+      ]);
     });
 
     it('should trace multiple levels of @import tagged with media lists', async function() {
@@ -2877,7 +2595,7 @@ describe('fontTracer', function() {
           getCssRulesByProperty,
           htmlAsset
         ),
-        'to exhaustively satisfy',
+        'to satisfy',
         [
           {
             text: 'foo',
@@ -2931,28 +2649,24 @@ describe('fontTracer', function() {
         '<div>foo</div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-family': 'font1',
-              'font-weight': '500',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': 'font1',
-              'font-weight': '400',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': 'font1',
+            'font-weight': '500',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': 'font1',
+            'font-weight': '400',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
   });
 
@@ -2963,20 +2677,16 @@ describe('fontTracer', function() {
         '<h1>foo</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-family': '"famfam"',
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': '"famfam"',
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
 
     it('should have longhand value override previous shorthand value', function() {
@@ -2985,20 +2695,16 @@ describe('fontTracer', function() {
         '<h1>foo</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-family': '"famfam"',
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': '"famfam"',
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        }
+      ]);
     });
   });
 
@@ -3010,44 +2716,40 @@ describe('fontTracer', function() {
         '<h1>bar</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '100',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '200',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '300',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '400',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '100',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '200',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '300',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '400',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should pick up all values of font-style used in an animation', function() {
@@ -3057,36 +2759,32 @@ describe('fontTracer', function() {
         '<h1>bar</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'oblique'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'italic'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'oblique'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'italic'
+          }
+        }
+      ]);
     });
 
     it('should support list-style-type being animated', function() {
@@ -3096,44 +2794,40 @@ describe('fontTracer', function() {
         '<ol><li>bar</li></ol>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'quux',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: '1.',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'I.',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'quux',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: '1.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'I.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should trace the intermediate values of font-weight', function() {
@@ -3143,44 +2837,40 @@ describe('fontTracer', function() {
         '<h1>bar</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '100',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '200',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '300',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '400',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '100',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '200',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '300',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '400',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     // This doesn't really make sense, but it works in browsers
@@ -3191,28 +2881,24 @@ describe('fontTracer', function() {
         '<div></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should handle conditional animations', function() {
@@ -3223,39 +2909,90 @@ describe('fontTracer', function() {
         '<h1>bar</h1>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '400',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '100',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '200',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '300',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '500',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '600',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': '700',
+            'font-style': 'normal'
+          }
+        }
+      ]);
+    });
+  });
+
+  describe('with CSS transitions', function() {
+    describe('with the transition shorthand', function() {
+      it('should trace all intermediate values of font-weight', function() {
+        var htmlText = [
+          '<style>h1 { font-weight: 400; transition: width 2s, height 2s, font-weight 2s, transform 2s; }</style>',
+          '<style>h1:hover { font-weight: 700; }</style>',
+          '<h1>bar</h1>'
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '700',
+              'font-style': 'normal'
+            }
+          },
           {
             text: 'bar',
             props: {
               'font-family': undefined,
               'font-weight': '400',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '100',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '200',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '300',
               'font-style': 'normal'
             }
           },
@@ -3274,67 +3011,8 @@ describe('fontTracer', function() {
               'font-weight': '600',
               'font-style': 'normal'
             }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': '700',
-              'font-style': 'normal'
-            }
           }
-        ]
-      );
-    });
-  });
-
-  describe('with CSS transitions', function() {
-    describe('with the transition shorthand', function() {
-      it('should trace all intermediate values of font-weight', function() {
-        var htmlText = [
-          '<style>h1 { font-weight: 400; transition: width 2s, height 2s, font-weight 2s, transform 2s; }</style>',
-          '<style>h1:hover { font-weight: 700; }</style>',
-          '<h1>bar</h1>'
-        ].join('');
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '400',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '500',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '600',
-                'font-style': 'normal'
-              }
-            }
-          ]
-        );
+        ]);
       });
     });
 
@@ -3346,44 +3024,40 @@ describe('fontTracer', function() {
           '<h1>bar</h1>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '400',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '500',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '600',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '700',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '400',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '500',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '600',
+              'font-style': 'normal'
+            }
+          }
+        ]);
       });
 
       it('should trace all intermediate values of font-weight when `all` is passed', function() {
@@ -3393,44 +3067,40 @@ describe('fontTracer', function() {
           '<h1>bar</h1>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '400',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '500',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '600',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '700',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '400',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '500',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '600',
+              'font-style': 'normal'
+            }
+          }
+        ]);
       });
 
       it('should not trace intermediate values of font-weight when neither `all` nor `font-weight` is passed', function() {
@@ -3440,28 +3110,24 @@ describe('fontTracer', function() {
           '<h1>bar</h1>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '400',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '700',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '400',
+              'font-style': 'normal'
+            }
+          }
+        ]);
       });
     });
   });
@@ -3478,20 +3144,16 @@ describe('fontTracer', function() {
           '</div>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: '      foo  ',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: '      foo  ',
+            props: {
+              'font-family': undefined,
+              'font-weight': '700',
+              'font-style': 'normal'
             }
-          ]
-        );
+          }
+        ]);
       });
 
       it('should trace the DOM nodes inside the conditional comment', function() {
@@ -3501,519 +3163,37 @@ describe('fontTracer', function() {
           '<![endif]-->'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '  ',
-              props: {
-                'font-family': undefined,
-                'font-style': 'normal',
-                'font-weight': 'normal'
-              }
-            }
-          ]
-        );
-      });
-
-      it('should trace the DOM nodes inside the conditional comment in the context of the containing document', function() {
-        var htmlText = [
-          '<style>section div { font-weight: 700 }</style>',
-          '<section>',
-          '  <!--[if IE]>',
-          '    <div>foo</div>',
-          '  <![endif]-->',
-          '</section>'
-        ].join('');
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '        ',
-              props: {
-                'font-family': undefined,
-                'font-style': 'normal',
-                'font-weight': 'normal'
-              }
-            }
-          ]
-        );
-      });
-
-      it('should trace the DOM nodes inside the conditional comment as conditional irt. the number of list items', function() {
-        var htmlText = [
-          '<ol>',
-          '  <!--[if IE]>',
-          '    <li></li>',
-          '  <![endif]-->',
-          '  <li style="list-style-type: upper-roman"></li>',
-          '</ol>'
-        ].join('');
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: '1.',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'I.II.',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '          ',
-              props: {
-                'font-family': undefined,
-                'font-style': 'normal',
-                'font-weight': 'normal'
-              }
-            }
-          ]
-        );
-      });
-
-      it('should treat contained stylesheets as conditionals', function() {
-        var htmlText = [
-          '<!--[if IE]>',
-          '  <style>div { font-weight: 700; }</style>',
-          '<![endif]-->',
-          '<div>foo</div>'
-        ].join('');
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '  ',
-              props: {
-                'font-family': undefined,
-                'font-style': 'normal',
-                'font-weight': 'normal'
-              }
-            }
-          ]
-        );
-      });
-
-      it('should trace stylesheets in multiple conditional comments with the same condition together', function() {
-        var htmlText = [
-          '<!--[if IE]>',
-          '  <style>div { font-weight: 700; }</style>',
-          '<![endif]-->',
-          '<!--[if IE]>',
-          '  <style>div { font-style: italic }</style>',
-          '<![endif]-->',
-          '<div>foo</div>'
-        ].join('');
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'italic'
-              }
-            },
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '    ',
-              props: {
-                'font-family': undefined,
-                'font-style': 'normal',
-                'font-weight': 'normal'
-              }
-            }
-          ]
-        );
-      });
-
-      it('should trace stylesheets in multiple conditional comments with different conditions separately', function() {
-        var htmlText = [
-          '<!--[if IE > 6]>',
-          '  <style>div { font-weight: 700; }</style>',
-          '<![endif]-->',
-          '<!--[if IE > 7]>',
-          '  <style>div { font-style: italic }</style>',
-          '<![endif]-->',
-          '<div>foo</div>'
-        ].join('');
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'italic'
-              }
-            },
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'italic'
-              }
-            },
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '    ',
-              props: {
-                'font-family': undefined,
-                'font-style': 'normal',
-                'font-weight': 'normal'
-              }
-            }
-          ]
-        );
-      });
-    });
-
-    describe('of the "if !IE" kind where the contained HTML is technically part of the containing document', function() {
-      it('should trace text inside the conditional comment', function() {
-        var htmlText = [
-          '<style>div { font-weight: 700; }</style>',
-          '<div><!--[if !IE]>-->foo<!--<![endif]--></div>'
-        ].join('');
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'normal'
-              }
-            }
-          ]
-        );
-      });
-
-      it('should trace the DOM nodes inside the conditional comment', function() {
-        var htmlText = ['<!--[if !IE]>--><div>foo</div><!--<![endif]-->'].join(
-          '\n'
-        );
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            }
-          ]
-        );
-      });
-
-      it('should trace the DOM nodes inside the conditional comment in the context of the containing document', function() {
-        var htmlText = [
-          '<style>section div { font-weight: 700 }</style>',
-          '<section>',
-          '  <!--[if !IE]>-->',
-          '    <div>foo</div>',
-          '  <!--<![endif]-->',
-          '</section>'
-        ].join('');
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '        ',
-              props: {
-                'font-family': undefined,
-                'font-style': 'normal',
-                'font-weight': 'normal'
-              }
-            }
-          ]
-        );
-      });
-
-      it('should trace the DOM nodes inside the conditional comment as conditional irt. the number of list items', function() {
-        var htmlText = [
-          '<ol>',
-          '  <!--[if !IE]>-->',
-          '    <li></li>',
-          '  <!--<![endif]-->',
-          '  <li style="list-style-type: upper-roman"></li>',
-          '</ol>'
-        ].join('');
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: '1.',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'I.II.',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: '          ',
-              props: {
-                'font-family': undefined,
-                'font-style': 'normal',
-                'font-weight': 'normal'
-              }
-            }
-          ]
-        );
-      });
-
-      it('should treat contained stylesheets as conditionals', function() {
-        var htmlText = [
-          '<!--[if !IE]>--><style>div { font-weight: 700; }</style><!--<![endif]-->',
-          '<div>foo</div>'
-        ].join('');
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            }
-          ]
-        );
-      });
-
-      it('should trace stylesheets in multiple conditional comments with the same condition together', function() {
-        var htmlText = [
-          '<!--[if !IE]>--><style>div { font-weight: 700; }</style><!--<![endif]-->',
-          '<!--[if !IE]>--><style>div { font-style: italic }</style><!--<![endif]-->',
-          '<div>foo</div>'
-        ].join('');
-
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': '700',
-                'font-style': 'italic'
-              }
-            },
-            {
-              text: 'foo',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
-            }
-          ]
-        );
-      });
-    });
-
-    it('should treat !IE and IE as an impossible combination that should not generate all possible combinations', function() {
-      var htmlText = [
-        '<!--[if IE]><style>div { font-style: italic; }</style><![endif]-->',
-        '<!--[if !IE]>--><style>div { font-weight: 700; }</style><!--<![endif]-->',
-        '<div>foo</div>'
-      ].join('');
-
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
+        return expect(htmlText, 'to satisfy computed font properties', [
           {
             text: 'foo',
             props: {
               'font-family': undefined,
               'font-weight': 'normal',
-              'font-style': 'italic'
+              'font-style': 'normal'
             }
           },
           {
-            text: 'foo',
+            text: '  ',
             props: {
               'font-family': undefined,
-              'font-weight': '700',
-              'font-style': 'normal'
+              'font-style': 'normal',
+              'font-weight': 'normal'
             }
           }
-        ]
-      );
-    });
-  });
+        ]);
+      });
 
-  describe('with <noscript>', function() {
-    it('should trace text inside the element', function() {
-      var htmlText = [
-        '<style>div { font-weight: 700; }</style>',
-        '<div><noscript>foo</noscript></div>'
-      ].join('');
+      it('should trace the DOM nodes inside the conditional comment in the context of the containing document', function() {
+        var htmlText = [
+          '<style>section div { font-weight: 700 }</style>',
+          '<section>',
+          '  <!--[if IE]>',
+          '    <div>foo</div>',
+          '  <![endif]-->',
+          '</section>'
+        ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': '700',
-              'font-style': 'normal'
-            }
-          }
-        ]
-      );
-    });
-
-    it('should trace the DOM nodes inside the element', function() {
-      var htmlText = ['<noscript><div>foo</div></noscript>'].join('');
-
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          }
-        ]
-      );
-    });
-
-    it('should trace the DOM nodes inside the element in the context of the containing document', function() {
-      var htmlText = [
-        '<style>section noscript div { font-weight: 700 }</style>',
-        '<section>',
-        '  <noscript>',
-        '    <div>foo</div>',
-        '  </noscript>',
-        '</section>'
-      ].join('');
-
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
+        return expect(htmlText, 'to satisfy computed font properties', [
           {
             text: 'foo',
             props: {
@@ -4030,24 +3210,20 @@ describe('fontTracer', function() {
               'font-weight': 'normal'
             }
           }
-        ]
-      );
-    });
+        ]);
+      });
 
-    it('should trace the DOM nodes inside the element as conditional irt. the number of list items', function() {
-      var htmlText = [
-        '<ol>',
-        '  <noscript>',
-        '    <li></li>',
-        '  </noscript>',
-        '  <li style="list-style-type: upper-roman"></li>',
-        '</ol>'
-      ].join('');
+      it('should trace the DOM nodes inside the conditional comment as conditional irt. the number of list items', function() {
+        var htmlText = [
+          '<ol>',
+          '  <!--[if IE]>',
+          '    <li></li>',
+          '  <![endif]-->',
+          '  <li style="list-style-type: upper-roman"></li>',
+          '</ol>'
+        ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
+        return expect(htmlText, 'to satisfy computed font properties', [
           {
             text: '1.',
             props: {
@@ -4072,20 +3248,251 @@ describe('fontTracer', function() {
               'font-weight': 'normal'
             }
           }
-        ]
-      );
+        ]);
+      });
+
+      it('should treat contained stylesheets as conditionals', function() {
+        var htmlText = [
+          '<!--[if IE]>',
+          '  <style>div { font-weight: 700; }</style>',
+          '<![endif]-->',
+          '<div>foo</div>'
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-weight': '700',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: '  ',
+            props: {
+              'font-family': undefined,
+              'font-style': 'normal',
+              'font-weight': 'normal'
+            }
+          }
+        ]);
+      });
+
+      it('should trace stylesheets in multiple conditional comments with the same condition together', function() {
+        var htmlText = [
+          '<!--[if IE]>',
+          '  <style>div { font-weight: 700; }</style>',
+          '<![endif]-->',
+          '<!--[if IE]>',
+          '  <style>div { font-style: italic }</style>',
+          '<![endif]-->',
+          '<div>foo</div>'
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-weight': '700',
+              'font-style': 'italic'
+            }
+          },
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: '    ',
+            props: {
+              'font-family': undefined,
+              'font-style': 'normal',
+              'font-weight': 'normal'
+            }
+          }
+        ]);
+      });
+
+      it('should trace stylesheets in multiple conditional comments with different conditions separately', function() {
+        var htmlText = [
+          '<!--[if IE > 6]>',
+          '  <style>div { font-weight: 700; }</style>',
+          '<![endif]-->',
+          '<!--[if IE > 7]>',
+          '  <style>div { font-style: italic }</style>',
+          '<![endif]-->',
+          '<div>foo</div>'
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-weight': '700',
+              'font-style': 'italic'
+            }
+          },
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'normal',
+              'font-style': 'italic'
+            }
+          },
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-weight': '700',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: '    ',
+            props: {
+              'font-family': undefined,
+              'font-style': 'normal',
+              'font-weight': 'normal'
+            }
+          }
+        ]);
+      });
     });
 
-    it('should treat contained stylesheets as conditionals', function() {
-      var htmlText = [
-        '<noscript><style>div { font-weight: 700; }</style></noscript>',
-        '<div>foo</div>'
-      ].join('');
+    describe('of the "if !IE" kind where the contained HTML is technically part of the containing document', function() {
+      it('should trace text inside the conditional comment', function() {
+        var htmlText = [
+          '<style>div { font-weight: 700; }</style>',
+          '<div><!--[if !IE]>-->foo<!--<![endif]--></div>'
+        ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-weight': '700',
+              'font-style': 'normal'
+            }
+          }
+        ]);
+      });
+
+      it('should trace the DOM nodes inside the conditional comment', function() {
+        var htmlText = ['<!--[if !IE]>--><div>foo</div><!--<![endif]-->'].join(
+          '\n'
+        );
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          }
+        ]);
+      });
+
+      it('should trace the DOM nodes inside the conditional comment in the context of the containing document', function() {
+        var htmlText = [
+          '<style>section div { font-weight: 700 }</style>',
+          '<section>',
+          '  <!--[if !IE]>-->',
+          '    <div>foo</div>',
+          '  <!--<![endif]-->',
+          '</section>'
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-weight': '700',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: '        ',
+            props: {
+              'font-family': undefined,
+              'font-style': 'normal',
+              'font-weight': 'normal'
+            }
+          }
+        ]);
+      });
+
+      it('should trace the DOM nodes inside the conditional comment as conditional irt. the number of list items', function() {
+        var htmlText = [
+          '<ol>',
+          '  <!--[if !IE]>-->',
+          '    <li></li>',
+          '  <!--<![endif]-->',
+          '  <li style="list-style-type: upper-roman"></li>',
+          '</ol>'
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: '1.',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'I.II.',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: '          ',
+            props: {
+              'font-family': undefined,
+              'font-style': 'normal',
+              'font-weight': 'normal'
+            }
+          }
+        ]);
+      });
+
+      it('should treat contained stylesheets as conditionals', function() {
+        var htmlText = [
+          '<!--[if !IE]>--><style>div { font-weight: 700; }</style><!--<![endif]-->',
+          '<div>foo</div>'
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
           {
             text: 'foo',
             props: {
@@ -4102,21 +3509,17 @@ describe('fontTracer', function() {
               'font-style': 'normal'
             }
           }
-        ]
-      );
-    });
+        ]);
+      });
 
-    it('should trace stylesheets in multiple <noscript> elements together', function() {
-      var htmlText = [
-        '<noscript><style>div { font-weight: 700; }</style></noscript>',
-        '<noscript><style>div { font-style: italic }</style></noscript>',
-        '<div>foo</div>'
-      ].join('');
+      it('should trace stylesheets in multiple conditional comments with the same condition together', function() {
+        var htmlText = [
+          '<!--[if !IE]>--><style>div { font-weight: 700; }</style><!--<![endif]-->',
+          '<!--[if !IE]>--><style>div { font-style: italic }</style><!--<![endif]-->',
+          '<div>foo</div>'
+        ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
+        return expect(htmlText, 'to satisfy computed font properties', [
           {
             text: 'foo',
             props: {
@@ -4133,8 +3536,191 @@ describe('fontTracer', function() {
               'font-style': 'normal'
             }
           }
-        ]
-      );
+        ]);
+      });
+    });
+
+    it('should treat !IE and IE as an impossible combination that should not generate all possible combinations', function() {
+      var htmlText = [
+        '<!--[if IE]><style>div { font-style: italic; }</style><![endif]-->',
+        '<!--[if !IE]>--><style>div { font-weight: 700; }</style><!--<![endif]-->',
+        '<div>foo</div>'
+      ].join('');
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'italic'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': '700',
+            'font-style': 'normal'
+          }
+        }
+      ]);
+    });
+  });
+
+  describe('with <noscript>', function() {
+    it('should trace text inside the element', function() {
+      var htmlText = [
+        '<style>div { font-weight: 700; }</style>',
+        '<div><noscript>foo</noscript></div>'
+      ].join('');
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': '700',
+            'font-style': 'normal'
+          }
+        }
+      ]);
+    });
+
+    it('should trace the DOM nodes inside the element', function() {
+      var htmlText = ['<noscript><div>foo</div></noscript>'].join('');
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
+    });
+
+    it('should trace the DOM nodes inside the element in the context of the containing document', function() {
+      var htmlText = [
+        '<style>section noscript div { font-weight: 700 }</style>',
+        '<section>',
+        '  <noscript>',
+        '    <div>foo</div>',
+        '  </noscript>',
+        '</section>'
+      ].join('');
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': '700',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: '        ',
+          props: {
+            'font-family': undefined,
+            'font-style': 'normal',
+            'font-weight': 'normal'
+          }
+        }
+      ]);
+    });
+
+    it('should trace the DOM nodes inside the element as conditional irt. the number of list items', function() {
+      var htmlText = [
+        '<ol>',
+        '  <noscript>',
+        '    <li></li>',
+        '  </noscript>',
+        '  <li style="list-style-type: upper-roman"></li>',
+        '</ol>'
+      ].join('');
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: '1.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'I.II.',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: '          ',
+          props: {
+            'font-family': undefined,
+            'font-style': 'normal',
+            'font-weight': 'normal'
+          }
+        }
+      ]);
+    });
+
+    it('should treat contained stylesheets as conditionals', function() {
+      var htmlText = [
+        '<noscript><style>div { font-weight: 700; }</style></noscript>',
+        '<div>foo</div>'
+      ].join('');
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': '700',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
+    });
+
+    it('should trace stylesheets in multiple <noscript> elements together', function() {
+      var htmlText = [
+        '<noscript><style>div { font-weight: 700; }</style></noscript>',
+        '<noscript><style>div { font-style: italic }</style></noscript>',
+        '<div>foo</div>'
+      ].join('');
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': '700',
+            'font-style': 'italic'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
   });
 
@@ -4150,36 +3736,32 @@ describe('fontTracer', function() {
     it('should produce a subset that accommodates both renderings', function() {
       var htmlText = ['<h1>foo<strong>bar</strong></h1>'].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold+bolder',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'bar',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'foo',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'bold',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold+bolder',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'bar',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
+          }
+        },
+        {
+          text: 'foo',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'bold',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
   });
 
@@ -4188,20 +3770,16 @@ describe('fontTracer', function() {
       '<style>:host(.special-custom-element) { display: block; }</style><h1>foo</h1>'
     ].join('');
 
-    return expect(
-      htmlText,
-      'to exhaustively satisfy computed font properties',
-      [
-        {
-          text: 'foo',
-          props: {
-            'font-family': undefined,
-            'font-style': 'normal',
-            'font-weight': 'bold'
-          }
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'foo',
+        props: {
+          'font-family': undefined,
+          'font-style': 'normal',
+          'font-weight': 'bold'
         }
-      ]
-    );
+      }
+    ]);
   });
 
   describe('with CSS custom properties', function() {
@@ -4220,7 +3798,7 @@ describe('fontTracer', function() {
 
           <div>bar</div>
         `,
-        'to exhaustively satisfy computed font properties',
+        'to satisfy computed font properties',
         [
           {
             text: 'bar',
@@ -4265,7 +3843,7 @@ describe('fontTracer', function() {
             blah
           </div>
         `,
-        'to exhaustively satisfy computed font properties',
+        'to satisfy computed font properties',
         [
           {
             text: 'baz',
@@ -4318,7 +3896,7 @@ describe('fontTracer', function() {
             blah
           </div>
         `,
-        'to exhaustively satisfy computed font properties',
+        'to satisfy computed font properties',
         [
           {
             text: 'baz',
@@ -4367,7 +3945,7 @@ describe('fontTracer', function() {
 
           <div>bar</div>
         `,
-        'to exhaustively satisfy computed font properties',
+        'to satisfy computed font properties',
         [
           {
             text: 'bar',
@@ -4411,7 +3989,7 @@ describe('fontTracer', function() {
 
           <div>quux</div>
         `,
-        'to exhaustively satisfy computed font properties',
+        'to satisfy computed font properties',
         [
           {
             text: 'quux',
@@ -4471,7 +4049,7 @@ describe('fontTracer', function() {
 
           <div>baz</div>
         `,
-        'to exhaustively satisfy computed font properties',
+        'to satisfy computed font properties',
         [
           {
             text: 'baz',
@@ -4520,7 +4098,7 @@ describe('fontTracer', function() {
 
           <div>baz</div>
         `,
-        'to exhaustively satisfy computed font properties',
+        'to satisfy computed font properties',
         [
           {
             text: 'baz',
@@ -4562,7 +4140,7 @@ describe('fontTracer', function() {
     it('should not break when an inline style specifies a custom property that has not been defined yet', async function() {
       await expect(
         `<div style="--foo: bar;">foo</div>`,
-        'to exhaustively satisfy computed font properties',
+        'to satisfy computed font properties',
         [
           {
             text: 'foo',
@@ -4588,7 +4166,7 @@ describe('fontTracer', function() {
 
             <div>quux</div>
           `,
-          'to exhaustively satisfy computed font properties',
+          'to satisfy computed font properties',
           [
             {
               text: 'quux',
@@ -4625,7 +4203,7 @@ describe('fontTracer', function() {
 
             <div>quux</div>
           `,
-          'to exhaustively satisfy computed font properties',
+          'to satisfy computed font properties',
           [
             {
               text: 'quux',
@@ -4659,7 +4237,7 @@ describe('fontTracer', function() {
 
           <div>quux</div>
         `,
-        'to exhaustively satisfy computed font properties',
+        'to satisfy computed font properties',
         [
           {
             text: 'quux',
@@ -4697,7 +4275,7 @@ describe('fontTracer', function() {
 
             <div></div>
           `,
-          'to exhaustively satisfy computed font properties',
+          'to satisfy computed font properties',
           [
             {
               text: 'var(--my-font)',
@@ -4734,7 +4312,7 @@ describe('fontTracer', function() {
 
             <div>quux</div>
           `,
-          'to exhaustively satisfy computed font properties',
+          'to satisfy computed font properties',
           [
             {
               text: 'quux',
@@ -4768,7 +4346,7 @@ describe('fontTracer', function() {
             </style>
             <div>quux</div>
           `,
-          'to exhaustively satisfy computed font properties',
+          'to satisfy computed font properties',
           [
             {
               text: 'quux',
@@ -4801,7 +4379,7 @@ describe('fontTracer', function() {
             </style>
             <div>quux</div>
           `,
-          'to exhaustively satisfy computed font properties',
+          'to satisfy computed font properties',
           [
             {
               text: 'quux',
@@ -4833,36 +4411,32 @@ describe('fontTracer', function() {
           '<h1>bar</h1>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'bold',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'bold',
-                'font-style': 'oblique'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'bold',
-                'font-style': 'italic'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'bold',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'bold',
+              'font-style': 'oblique'
+            }
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'bold',
+              'font-style': 'italic'
+            }
+          }
+        ]);
       });
 
       it.skip('should trace the intermediate values of font-weight', function() {
@@ -4873,44 +4447,40 @@ describe('fontTracer', function() {
           '<h1>bar</h1>'
         ].join('');
 
-        return expect(
-          htmlText,
-          'to exhaustively satisfy computed font properties',
-          [
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '100',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '200',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': '300',
-                'font-style': 'normal'
-              }
-            },
-            {
-              text: 'bar',
-              props: {
-                'font-family': undefined,
-                'font-weight': 'normal',
-                'font-style': 'normal'
-              }
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '100',
+              'font-style': 'normal'
             }
-          ]
-        );
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '200',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': '300',
+              'font-style': 'normal'
+            }
+          },
+          {
+            text: 'bar',
+            props: {
+              'font-family': undefined,
+              'font-weight': 'normal',
+              'font-style': 'normal'
+            }
+          }
+        ]);
       });
     });
 
@@ -4958,28 +4528,24 @@ describe('fontTracer', function() {
         '<div></div>'
       ].join('');
 
-      return expect(
-        htmlText,
-        'to exhaustively satisfy computed font properties',
-        [
-          {
-            text: 'the other value',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
-          },
-          {
-            text: 'the value',
-            props: {
-              'font-family': undefined,
-              'font-weight': 'normal',
-              'font-style': 'normal'
-            }
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'the other value',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
           }
-        ]
-      );
+        },
+        {
+          text: 'the value',
+          props: {
+            'font-family': undefined,
+            'font-weight': 'normal',
+            'font-style': 'normal'
+          }
+        }
+      ]);
     });
 
     it('should support custom property expansion in the counter-increment property', function() {
