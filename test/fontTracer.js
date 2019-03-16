@@ -23,12 +23,14 @@ expect.addAssertion(
 
     await assetGraph.populate({ followRelations: { crossorigin: false } });
 
-    const traces = fontTracer(
-      htmlAsset.parseTree,
-      gatherStylesheetsWithPredicates(htmlAsset.assetGraph, htmlAsset),
+    const traces = fontTracer(htmlAsset.parseTree, {
+      stylesheetsWithPredicates: gatherStylesheetsWithPredicates(
+        htmlAsset.assetGraph,
+        htmlAsset
+      ),
       getCssRulesByProperty,
       htmlAsset
-    );
+    });
 
     expect(traces, 'to [exhaustively] satisfy', result);
   }
@@ -2589,12 +2591,14 @@ describe('fontTracer', function() {
       await assetGraph.populate();
 
       expect(
-        fontTracer(
-          htmlAsset.parseTree,
-          gatherStylesheetsWithPredicates(htmlAsset.assetGraph, htmlAsset),
+        fontTracer(htmlAsset.parseTree, {
+          stylesheetsWithPredicates: gatherStylesheetsWithPredicates(
+            htmlAsset.assetGraph,
+            htmlAsset
+          ),
           getCssRulesByProperty,
           htmlAsset
-        ),
+        }),
         'to satisfy',
         [
           {
