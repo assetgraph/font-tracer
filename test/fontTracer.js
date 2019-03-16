@@ -4573,6 +4573,39 @@ describe('fontTracer', function() {
     });
   });
 
+  it('should include the predicates for each traced text', function() {
+    var htmlText = [
+      "<style>:root { --my-prop: 'the value'; }</style>",
+      "<style>@media projection { :root { --my-prop: 'the other value'; } }</style>",
+      '<style>div:after { content: var(--my-prop); }</style>',
+      "<style>div:hover:after { content: 'how about now'; }</style>",
+      '<div></div>'
+    ].join('');
+
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'how about now',
+        predicates: expect.it('to equal', {
+          'selectorWithPseudoClasses:div:hover:after': true
+        })
+      },
+      {
+        text: 'the other value',
+        predicates: expect.it('to equal', {
+          'selectorWithPseudoClasses:div:hover:after': false,
+          'mediaQuery:projection': true
+        })
+      },
+      {
+        text: 'the value',
+        predicates: expect.it('to equal', {
+          'selectorWithPseudoClasses:div:hover:after': false,
+          'mediaQuery:projection': false
+        })
+      }
+    ]);
+  });
+
   describe('when requesting another set of properties to be traced', function() {
     it('should include the extra properties', async function() {
       const assetGraph = new AssetGraph();
