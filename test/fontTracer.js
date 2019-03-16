@@ -4664,4 +4664,60 @@ describe('fontTracer', function() {
       );
     });
   });
+
+  describe('when deduplicate:false is passed', function() {
+    it('should include each text trace separately', async function() {
+      const assetGraph = new AssetGraph();
+
+      const htmlAsset = assetGraph.addAsset({
+        type: 'Html',
+        text: `<!DOCTYPE html><html><body><p>foo</p><p>foo</p></body></html>`
+      });
+
+      expect(
+        fontTracer(htmlAsset.parseTree, {
+          stylesheetsWithPredicates: gatherStylesheetsWithPredicates(
+            htmlAsset.assetGraph,
+            htmlAsset
+          ),
+          getCssRulesByProperty,
+          htmlAsset,
+          deduplicate: false
+        }),
+        'to satisfy',
+        [
+          {
+            text: 'foo',
+            node: expect.it(node => {
+              expect(
+                Array.from(node.parentNode.childNodes).indexOf(node),
+                'to equal',
+                0
+              );
+            }),
+            props: {
+              'font-family': undefined,
+              'font-style': 'normal',
+              'font-weight': 'normal'
+            }
+          },
+          {
+            text: 'foo',
+            node: expect.it(node => {
+              expect(
+                Array.from(node.parentNode.childNodes).indexOf(node),
+                'to equal',
+                1
+              );
+            }),
+            props: {
+              'font-family': undefined,
+              'font-style': 'normal',
+              'font-weight': 'normal'
+            }
+          }
+        ]
+      );
+    });
+  });
 });
