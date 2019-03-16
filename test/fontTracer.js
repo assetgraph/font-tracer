@@ -1,5 +1,8 @@
 const pathModule = require('path');
-const expect = require('unexpected').clone();
+const expect = require('unexpected')
+  .clone()
+  .use(require('unexpected-dom'))
+  .use(require('magicpen-prism'));
 const AssetGraph = require('assetgraph');
 const fontTracer = require('../lib/fontTracer');
 const gatherStylesheetsWithPredicates = require('assetgraph/lib/util/fonts/gatherStylesheetsWithPredicates');
@@ -37,7 +40,7 @@ describe('fontTracer', function() {
       {
         text: 'foo',
         node: {
-          nodeName: 'DIV'
+          name: 'div'
         }
       }
     ]);
