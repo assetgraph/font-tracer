@@ -4572,4 +4572,63 @@ describe('fontTracer', function() {
       ]);
     });
   });
+
+  describe('when requesting another set of properties to be traced', function() {
+    it('should include the extra properties', async function() {
+      const assetGraph = new AssetGraph();
+
+      const htmlAsset = assetGraph.addAsset({
+        type: 'Html',
+        text: `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <style>span { font-size: 20px }</style>
+            </head>
+            <body><p>Foo <span>bar</span> quux</p></body>
+          </html>
+        `
+      });
+
+      expect(
+        fontTracer(htmlAsset.parseTree, {
+          stylesheetsWithPredicates: gatherStylesheetsWithPredicates(
+            htmlAsset.assetGraph,
+            htmlAsset
+          ),
+          getCssRulesByProperty,
+          htmlAsset,
+          propsToReturn: ['font-size']
+        }),
+        'to satisfy',
+        [
+          {
+            text: 'bar',
+            props: {
+              'font-size': '20px',
+              'font-weight': undefined
+            }
+          },
+          {
+            text: 'Foo  quux',
+            props: {
+              'font-size': undefined
+            }
+          },
+          {
+            text: '                    ',
+            props: {
+              'font-size': undefined
+            }
+          },
+          {
+            text: '             ',
+            props: {
+              'font-size': undefined
+            }
+          }
+        ]
+      );
+    });
+  });
 });
