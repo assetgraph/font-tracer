@@ -19,7 +19,7 @@
     "memoizesync": "^1.1.1",
     "mocha": "^6.0.2",
     "nyc": "^13.3.0",
-    "prettier": "~1.16.0",
+    "prettier": "~1.17.0",
     "puppeteer": "^1.12.2",
     "rollup": "^1.2.2",
     "rollup-plugin-commonjs": "^9.2.0",
