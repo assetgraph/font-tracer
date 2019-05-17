@@ -25,7 +25,7 @@
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-globals": "^1.4.0",
-    "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-node-resolve": "^5.0.0",
     "sinon": "^7.2.4",
     "unexpected": "^11.1.0",
     "unexpected-dom": "^4.12.1",
