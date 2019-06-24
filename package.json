@@ -29,7 +29,7 @@
     "sinon": "^7.2.4",
     "unexpected": "^11.1.0",
     "unexpected-dom": "^4.12.1",
-    "unexpected-resemble": "^3.4.1",
+    "unexpected-resemble": "^4.0.0",
     "unexpected-sinon": "^10.11.1",
     "urltools": "^0.4.1",
     "webpack": "^4.16.1"
