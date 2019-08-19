@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "capitalize": "^2.0.0",
+    "css-font-parser-papandreou": "^0.2.3-patch1",
     "css-font-weight-names": "^0.2.1",
     "postcss-values-parser": "^2.0.1",
     "specificity": "^0.4.1"
