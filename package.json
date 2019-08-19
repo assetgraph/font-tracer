@@ -6,7 +6,6 @@
   "main": "lib/fontTracer.js",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "assetgraph": "^5.7.1",
     "eslint": "^6.0.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-config-standard": "^13.0.1",
@@ -27,6 +26,7 @@
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^5.0.1",
     "sinon": "^7.2.4",
+    "subfont": "^3.7.0",
     "unexpected": "^11.1.0",
     "unexpected-dom": "^4.12.1",
     "unexpected-resemble": "^4.0.0",
@@ -49,6 +49,7 @@
   },
   "dependencies": {
     "capitalize": "^2.0.0",
+    "css-font-parser-papandreou": "^0.2.3-patch1",
     "css-font-weight-names": "^0.2.1",
     "postcss-values-parser": "^2.0.1",
     "specificity": "^0.4.1"

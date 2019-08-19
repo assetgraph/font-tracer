@@ -5,8 +5,8 @@ const expect = require('unexpected')
   .use(require('magicpen-prism'));
 const AssetGraph = require('assetgraph');
 const fontTracer = require('../lib/fontTracer');
-const gatherStylesheetsWithPredicates = require('assetgraph/lib/util/fonts/gatherStylesheetsWithPredicates');
-const getCssRulesByProperty = require('assetgraph/lib/util/fonts/getCssRulesByProperty');
+const gatherStylesheetsWithPredicates = require('subfont/lib/gatherStylesheetsWithPredicates');
+const getCssRulesByProperty = require('subfont/lib/getCssRulesByProperty');
 
 expect.addAssertion(
   '<string> to [exhaustively] satisfy computed font properties <array>',
