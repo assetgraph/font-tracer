@@ -6,7 +6,7 @@
   "main": "lib/fontTracer.js",
   "license": "BSD-3-Clause",
   "devDependencies": {
-    "assetgraph": "^5.7.1",
+    "assetgraph": "^6.0.0",
     "eslint": "^6.0.0",
     "eslint-config-prettier": "^6.0.0",
     "eslint-config-standard": "^13.0.1",
