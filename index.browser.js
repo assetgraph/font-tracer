@@ -4,7 +4,7 @@ const gatherStylesheetsWithPredicates = require('./lib/gatherStylesheetsWithPred
 module.exports = function(document, options) {
   return fontTracer(document, {
     stylesheetsWithPredicates: gatherStylesheetsWithPredicates(document),
-    getCssRulesByProperty: require('assetgraph/lib/util/fonts/getCssRulesByProperty'),
+    getCssRulesByProperty: require('subfont/lib/getCssRulesByProperty'),
     ...options
   });
 };
