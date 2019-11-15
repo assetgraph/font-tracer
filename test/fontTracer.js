@@ -4722,7 +4722,7 @@ describe('fontTracer', function() {
   });
 
   // Awaiting https://github.com/Munter/subfont/pull/70
-  describe.skip('with XML namespaces', function() {
+  describe('with XML namespaces', function() {
     it('should not consider a <title> inside a <math> to be display:none despite the default stylesheet', async function() {
       const htmlText =
         '<html><head><title>foo</title></head><body><math><title>bar</title></math></body></html>';
