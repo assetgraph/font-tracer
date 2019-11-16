@@ -2202,6 +2202,36 @@ describe('fontTracer', function() {
       ]);
     });
 
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/list-style-type#symbols()
+    describe('with a list-style-type provided as "anonymous" counter-style', function() {
+      it('should trace the resulting symbols', async function() {
+        var htmlText = [
+          '<style>li { list-style-type: symbols(cyclic "*" "†" "‡"); }</style>',
+          '<ol><li>foo</li><li>bar</li></ol>'
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          { text: '*' },
+          { text: 'foo' },
+          { text: '†' },
+          { text: 'bar' }
+        ]);
+      });
+
+      it('should not break with symbols()', async function() {
+        var htmlText = [
+          '<html><head><style>',
+          'li { list-style-type: symbols(); }',
+          '</style></head><body><ol><li>foo</li></ol></body></html>'
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          { text: '1' },
+          { text: 'foo' }
+        ]);
+      });
+    });
+
     it('should include the indicators when display:list-item and list-style are applied to an element', function() {
       var htmlText = [
         '<style>div { display: list-item; list-style: upper-roman inside; }</style>',
