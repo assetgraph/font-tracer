@@ -1543,6 +1543,23 @@ describe('fontTracer', function() {
         ]);
       });
 
+      it("should utilize the fallback counter's fallback", function() {
+        var htmlText = [
+          '<style>@counter-style foo { system: fixed; symbols: Ⓐ; fallback: bar }</style>',
+          '<style>@counter-style bar { system: fixed; symbols: X Y; fallback: baz }</style>',
+          '<style>@counter-style baz { system: fixed; symbols: Æ Ø Å; fallback: upper-roman }</style>',
+          '<style>li { list-style-type: foo }</style>',
+          '<ol><li></li><li></li><li></li><li></li></ol>'
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          { text: 'Ⓐ' },
+          { text: 'Y' },
+          { text: 'Å' },
+          { text: 'IV' }
+        ]);
+      });
+
       it('should trace conditional @counter-style declarations', function() {
         var htmlText = [
           '<style>@counter-style circled-alpha { system: fixed; symbols: Ⓐ Ⓑ Ⓒ }</style>',
