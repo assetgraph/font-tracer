@@ -1968,7 +1968,7 @@ describe('fontTracer', function() {
     });
 
     describe('with ::first-line', function() {
-      it('should pessimistically assume that all of the content is rendered in both the the base and the ::first-line style', function() {
+      it('should pessimistically assume that all of the content is rendered in both the base and the ::first-line style', function() {
         var htmlText = [
           '<style>p::first-line { font-weight: 700; }</style>',
           '<p>foo bar quux</p>'
