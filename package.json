@@ -17,7 +17,7 @@
     "magicpen-prism": "^3.0.1",
     "memoizesync": "^1.1.1",
     "mocha": "^6.0.2",
-    "nyc": "^14.0.0",
+    "nyc": "^15.0.0",
     "prettier": "~1.19.1",
     "puppeteer": "^2.0.0",
     "rollup": "^1.2.2",
