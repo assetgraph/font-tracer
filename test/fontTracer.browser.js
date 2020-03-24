@@ -16,22 +16,22 @@ async function transferResults(jsHandle) {
   return results;
 }
 
-describe('fontTracer.browser', function() {
+describe('fontTracer.browser', function () {
   let browser, page;
-  beforeEach(async function() {
+  beforeEach(async function () {
     browser = await puppeteer.launch();
     page = await browser.newPage();
     await page.setViewport({
       width: 200,
-      height: 200
+      height: 200,
     });
   });
 
-  afterEach(async function() {
+  afterEach(async function () {
     await browser.close();
   });
 
-  it('should trace a test case', async function() {
+  it('should trace a test case', async function () {
     const fileName = pathModule.resolve(
       __dirname,
       '..',
@@ -51,7 +51,7 @@ describe('fontTracer.browser', function() {
           'dist',
           'fontTracer.browser.js'
         )
-      )
+      ),
     });
     const jsHandle = await page.evaluateHandle(() => fontTracer(document));
     const results = await transferResults(jsHandle);
@@ -59,20 +59,20 @@ describe('fontTracer.browser', function() {
     expect(results, 'to satisfy', [
       {
         text: 'foo',
-        props: { 'font-style': 'normal', 'font-weight': '500' }
+        props: { 'font-style': 'normal', 'font-weight': '500' },
       },
       {
         text: '        ',
-        props: { 'font-style': 'normal', 'font-weight': 'normal' }
+        props: { 'font-style': 'normal', 'font-weight': 'normal' },
       },
       {
         text: ' ',
-        props: { 'font-style': 'normal', 'font-weight': 'normal' }
-      }
+        props: { 'font-style': 'normal', 'font-weight': 'normal' },
+      },
     ]);
   });
 
-  it('should produce screenshot', async function() {
+  it('should produce screenshot', async function () {
     const fileName = pathModule.resolve(
       __dirname,
       '..',
@@ -92,7 +92,7 @@ describe('fontTracer.browser', function() {
           'dist',
           'fontTracer.browser.js'
         )
-      )
+      ),
     });
     const jsHandle = await page.evaluateHandle(() => fontTracer(document));
     const results = await transferResults(jsHandle);
@@ -132,7 +132,7 @@ describe('fontTracer.browser', function() {
       )
     );
 
-    await page.evaluateHandle(div => {
+    await page.evaluateHandle((div) => {
       div.parentElement.removeChild(div);
     }, div);
   });

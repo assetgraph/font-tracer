@@ -23,8 +23,8 @@ module.exports = () => ({
         path: __dirname,
         filename: 'postcss.js',
         library: 'postcss',
-        libraryTarget: 'commonjs2'
-      }
+        libraryTarget: 'commonjs2',
+      },
     });
 
     // Write files to memory, not disk
@@ -43,11 +43,14 @@ module.exports = () => ({
         }
 
         return resolve({
-          code: memfs.readFileSync(path.join(__dirname, './postcss.js'), 'utf8')
+          code: memfs.readFileSync(
+            path.join(__dirname, './postcss.js'),
+            'utf8'
+          ),
 
           // TODO: figure out source map
         });
       });
     });
-  }
+  },
 });
