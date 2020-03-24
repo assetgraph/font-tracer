@@ -1,3 +1,4 @@
+language: node_js
 node_js:
   - 8
   - 10
@@ -10,5 +11,5 @@ matrix:
       node_js: 12
       script: npm run lint
 
-script: 'npm install && npm run test:ci'
+script: npm run test:ci
 after_success: '<coverage/lcov.info ./node_modules/coveralls/bin/coveralls.js'
