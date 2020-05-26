@@ -26,7 +26,7 @@
     "rollup-plugin-node-globals": "^1.4.0",
     "rollup-plugin-node-resolve": "^5.0.1",
     "sinon": "^9.0.0",
-    "subfont": "^4.0.4",
+    "subfont": "^5.0.1",
     "unexpected": "^11.1.0",
     "unexpected-dom": "^4.12.1",
     "unexpected-resemble": "^4.0.0",
