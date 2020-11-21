@@ -28,7 +28,7 @@
     "sinon": "^9.0.2",
     "subfont": "^5.0.4",
     "unexpected": "^11.14.0",
-    "unexpected-dom": "^4.18.0",
+    "unexpected-dom": "^5.0.0",
     "unexpected-resemble": "^4.3.0",
     "unexpected-sinon": "^10.11.2",
     "urltools": "^0.4.1",
