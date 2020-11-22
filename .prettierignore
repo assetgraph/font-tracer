@@ -1,6 +1,7 @@
 /testdata/
 /node_modules/
 /coverage/
+/.nyc_output/
 /dist/
 
 # Don't fight npm install --save
