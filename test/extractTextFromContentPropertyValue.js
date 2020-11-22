@@ -3,26 +3,27 @@ const sinon = require('sinon');
 const expect = require('unexpected')
   .clone()
   .use(require('unexpected-sinon'))
-  .addAssertion('<array> to come out as <string|array>', function (
-    expect,
-    subject,
-    value
-  ) {
-    expect.errorMode = 'nested';
-    const result = extractTextFromContentPropertyValue(subject[0], subject[1]);
-    if (typeof value === 'string') {
-      expect(result, 'to satisfy', [{ value }]);
-    } else {
-      expect(result, 'to equal', value);
+  .addAssertion(
+    '<array> to come out as <string|array>',
+    function (expect, subject, value) {
+      expect.errorMode = 'nested';
+      const result = extractTextFromContentPropertyValue(
+        subject[0],
+        subject[1]
+      );
+      if (typeof value === 'string') {
+        expect(result, 'to satisfy', [{ value }]);
+      } else {
+        expect(result, 'to equal', value);
+      }
     }
-  })
-  .addAssertion('<string> to come out as <string|array>', function (
-    expect,
-    subject,
-    value
-  ) {
-    expect([subject], 'to come out as', value);
-  });
+  )
+  .addAssertion(
+    '<string> to come out as <string|array>',
+    function (expect, subject, value) {
+      expect([subject], 'to come out as', value);
+    }
+  );
 
 describe('extractTextFromContentPropertyValue', function () {
   it('should return empty string for none', function () {
