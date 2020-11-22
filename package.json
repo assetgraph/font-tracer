@@ -40,7 +40,7 @@
   ],
   "browser": "dist/fontTracer.browser.js",
   "scripts": {
-    "lint": "eslint . && prettier --check '**/*.js'",
+    "lint": "eslint . && prettier --check '**/*.{js,json,md}'",
     "test": "mocha",
     "test:ci": "npm run dist && npm run coverage",
     "coverage": "NODE_ENV=test nyc --reporter=lcov --reporter=text --all -- mocha --reporter dot && echo google-chrome coverage/lcov-report/index.html",
