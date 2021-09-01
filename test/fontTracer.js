@@ -9,27 +9,27 @@ const gatherStylesheetsWithPredicates = require('subfont/lib/gatherStylesheetsWi
 const getCssRulesByProperty = require('subfont/lib/getCssRulesByProperty');
 
 expect.addAssertion(
-  '<string> to [exhaustively] satisfy computed font properties <array>',
+  '<string> [when parsed as SVG] to [exhaustively] satisfy computed font properties <array>',
   async function (expect, subject, result) {
     expect.subjectOutput = function (output) {
       output.code(subject, 'text/html');
     };
     const assetGraph = new AssetGraph();
 
-    const [htmlAsset] = await assetGraph.loadAssets({
-      type: 'Html',
+    const [asset] = await assetGraph.loadAssets({
+      type: expect.flags['when parsed as SVG'] ? 'Svg' : 'Html',
       text: subject,
     });
 
     await assetGraph.populate({ followRelations: { crossorigin: false } });
 
-    const traces = fontTracer(htmlAsset.parseTree, {
+    const traces = fontTracer(asset.parseTree, {
       stylesheetsWithPredicates: gatherStylesheetsWithPredicates(
-        htmlAsset.assetGraph,
-        htmlAsset
+        asset.assetGraph,
+        asset
       ),
       getCssRulesByProperty,
-      htmlAsset,
+      htmlAsset: asset,
     });
 
     expect(traces, 'to [exhaustively] satisfy', result);
@@ -4779,6 +4779,417 @@ describe('fontTracer', function () {
           text: 'bar',
         },
       ]);
+    });
+  });
+
+  describe('with SVG content', function () {
+    it('should trace the content of a text element', function () {
+      const svgText = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">
+          <text>Hello, world!</text>
+        </svg>
+      `;
+
+      return expect(
+        svgText,
+        'when parsed as SVG to satisfy computed font properties',
+        [
+          {
+            text: 'Hello, world!',
+            props: {
+              'font-family': undefined,
+            },
+          },
+        ]
+      );
+    });
+
+    it('should trace the content of a tspan element', function () {
+      const svgText = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">
+          <text>Hello, <tspan>world</tspan>!</text>
+        </svg>
+      `;
+
+      return expect(
+        svgText,
+        'when parsed as SVG to satisfy computed font properties',
+        [
+          {
+            text: 'world',
+            props: {
+              'font-family': undefined,
+            },
+          },
+          {
+            text: 'Hello, !',
+            props: {
+              'font-family': undefined,
+            },
+          },
+        ]
+      );
+    });
+
+    it('should trace the content of a textPath element', function () {
+      const svgText = `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path id="MyPath" fill="none" stroke="red"
+                d="M10,90 Q90,90 90,45 Q90,10 50,10 Q10,10 10,40 Q10,70 45,70 Q70,70 75,50" />
+          <text><textPath href="#MyPath">Quick brown fox jumps over the lazy dog.</textPath></text>
+        </svg>
+      `;
+
+      return expect(
+        svgText,
+        'when parsed as SVG to satisfy computed font properties',
+        [
+          {
+            text: 'Quick brown fox jumps over the lazy dog.',
+            props: {
+              'font-family': undefined,
+            },
+          },
+        ]
+      );
+    });
+
+    it('should ignore text nodes found in non-text elements', function () {
+      const svgText = `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path id="MyPath" fill="none" stroke="red"
+                d="M10,90 Q90,90 90,45 Q90,10 50,10 Q10,10 10,40 Q10,70 45,70 Q70,70 75,50" />
+          <foo>
+            Quick brown fox jumps over the lazy dog.
+          </foo>
+        </svg>
+      `;
+
+      return expect(
+        svgText,
+        'when parsed as SVG to satisfy computed font properties',
+        []
+      );
+    });
+
+    it('should trace font-related properties set in a style attribute', function () {
+      const svgText = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">
+          <text style="font-family: foo; font-style: italic; font-weight: 700;">Hello, world!</text>
+        </svg>
+      `;
+
+      return expect(
+        svgText,
+        'when parsed as SVG to satisfy computed font properties',
+        [
+          {
+            text: 'Hello, world!',
+            props: {
+              'font-family': 'foo',
+              'font-style': 'italic',
+              'font-weight': '700',
+            },
+          },
+        ]
+      );
+    });
+
+    it('should trace font-related properties set in an inline stylesheet', function () {
+      const svgText = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">
+          <defs>
+            <style>
+              text {
+                font-family: foo;
+                font-style: italic;
+                font-weight: 700;
+              }
+            </style>
+          </defs>
+          <text>Hello, world!</text>
+        </svg>
+      `;
+
+      return expect(
+        svgText,
+        'when parsed as SVG to satisfy computed font properties',
+        [
+          {
+            text: 'Hello, world!',
+            props: {
+              'font-family': 'foo',
+              'font-style': 'italic',
+              'font-weight': '700',
+            },
+          },
+        ]
+      );
+    });
+
+    it('should trace font-related properties set in an inline stylesheet in the surrounding HTML', function () {
+      const htmlText = `
+        <html>
+          <head>
+            <style>
+              text {
+                font-family: foo;
+                font-style: italic;
+                font-weight: 700;
+              }
+            </style>
+          </head>
+          <body>
+            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">
+              <text>Hello, world!</text>
+            </svg>
+          </body>
+        </html>
+      `;
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'Hello, world!',
+          props: {
+            'font-family': 'foo',
+            'font-style': 'italic',
+            'font-weight': '700',
+          },
+        },
+        // Whitespace from <html> and <body>:
+        {
+          text: '                                        ',
+        },
+        {
+          text: '           ',
+        },
+      ]);
+    });
+
+    it('should trace font-related properties set in an inline stylesheet in the surrounding HTML when they explicitly have the SVG namespace', function () {
+      const htmlText = `
+        <html>
+          <head>
+            <style>
+              @namespace url(http://www.w3.org/2000/svg);
+
+              text {
+                font-family: foo;
+                font-style: italic;
+                font-weight: 700;
+              }
+            </style>
+          </head>
+          <body>
+            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">
+              <text>Hello, world!</text>
+            </svg>
+          </body>
+        </html>
+      `;
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'Hello, world!',
+          props: {
+            'font-family': 'foo',
+            'font-style': 'italic',
+            'font-weight': '700',
+          },
+        },
+        // Whitespace from <html> and <body>:
+        {
+          text: '                                        ',
+        },
+        {
+          text: '           ',
+        },
+      ]);
+    });
+
+    it('should ignore font-related properties set in an inline stylesheet in the surrounding XML when they are explicitly namespaced to non-SVG', function () {
+      const htmlText = `
+        <html>
+          <head>
+            <style>
+              @namespace url(http://www.w3.org/1999/xhtml);
+
+              text {
+                font-family: foo;
+                font-style: italic;
+                font-weight: 700;
+              }
+            </style>
+          </head>
+          <body>
+            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">
+              <text>Hello, world!</text>
+            </svg>
+          </body>
+        </html>
+      `;
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'Hello, world!',
+          props: {
+            'font-family': undefined,
+            'font-style': 'normal',
+            'font-weight': 'normal',
+          },
+        },
+        // Whitespace from <html> and <body>:
+        {
+          text: '                                        ',
+        },
+        {
+          text: '           ',
+        },
+      ]);
+    });
+
+    it('should support the font-{family,weight,style,variant,stretch} attributes', function () {
+      const svgText = `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <text font-family="foo" font-weight="bold" font-style="italic" font-variant="small-caps" font-stretch="extra-expanded">Quick brown fox jumps over the lazy dog.</text>
+        </svg>
+      `;
+
+      return expect(
+        svgText,
+        'when parsed as SVG to satisfy computed font properties',
+        [
+          {
+            text: 'Quick brown fox jumps over the lazy dog.',
+            props: {
+              'font-family': 'foo',
+              'font-weight': 'bold',
+              'font-style': 'italic',
+              'font-variant': 'small-caps',
+              'font-stretch': 'extra-expanded',
+            },
+          },
+        ]
+      );
+    });
+
+    it('should support the font-{family,weight,style,variant,stretch} attributes set on an ancestor SVG element', function () {
+      const svgText = `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" font-family="foo" font-weight="bold" font-style="italic" font-variant="small-caps" font-stretch="extra-expanded">
+          <text><tspan>Quick brown fox jumps over the lazy dog.</tspan></text>
+        </svg>
+      `;
+
+      return expect(
+        svgText,
+        'when parsed as SVG to satisfy computed font properties',
+        [
+          {
+            text: 'Quick brown fox jumps over the lazy dog.',
+            props: {
+              'font-family': 'foo',
+              'font-weight': 'bold',
+              'font-style': 'italic',
+              'font-variant': 'small-caps',
+              'font-stretch': 'extra-expanded',
+            },
+          },
+        ]
+      );
+    });
+
+    it('should pick up the font-{family,weight,style,variant,stretch} attributes from the closest parent when they are specified on multiple elements', function () {
+      const svgText = `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" font-family="foo" font-weight="bold" font-style="italic" font-variant="small-caps" font-stretch="extra-expanded">
+          <text font-style="oblique"><tspan font-weight="100">Quick brown fox jumps over the lazy dog.</tspan></text>
+        </svg>
+      `;
+
+      return expect(
+        svgText,
+        'when parsed as SVG to satisfy computed font properties',
+        [
+          {
+            text: 'Quick brown fox jumps over the lazy dog.',
+            props: {
+              'font-family': 'foo',
+              'font-weight': '100',
+              'font-style': 'oblique',
+              'font-variant': 'small-caps',
+              'font-stretch': 'extra-expanded',
+            },
+          },
+        ]
+      );
+    });
+
+    it('should ignore the font-{family,weight,style,variant,stretch} attributes on parent HTML elements', function () {
+      const svgText = `
+        <html>
+          <body font-family="foo" font-style="italic">
+            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="100">
+              <text>Hello, world!</text>
+            </svg>
+          </body>
+        </html>
+      `;
+
+      return expect(
+        svgText,
+        'when parsed as SVG to satisfy computed font properties',
+        [
+          {
+            text: 'Hello, world!',
+            props: {
+              'font-family': undefined,
+              'font-style': undefined,
+            },
+          },
+          // Whitespace from <html> and <body>:
+          {
+            text: '                        ',
+          },
+          {
+            text: '                    ',
+          },
+        ]
+      );
+    });
+
+    it('should ignore the font-{family,weight,style,variant,stretch} attributes when the same properties are applied via CSS', function () {
+      const svgText = `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <style>
+              text {
+                font-family: bar;
+                font-weight: 100;
+                font-style: normal;
+                font-variant: normal;
+                font-stretch: normal;
+              }
+            </style>
+          </defs>
+          <text font-family="foo" font-weight="bold" font-style="italic" font-variant="small-caps" font-stretch="extra-expanded">Quick brown fox jumps over the lazy dog.</text>
+        </svg>
+      `;
+
+      return expect(
+        svgText,
+        'when parsed as SVG to satisfy computed font properties',
+        [
+          {
+            text: 'Quick brown fox jumps over the lazy dog.',
+            props: {
+              'font-family': 'bar',
+              'font-weight': '100',
+              'font-style': 'normal',
+              'font-variant': 'normal',
+              'font-stretch': 'normal',
+            },
+          },
+        ]
+      );
     });
   });
 });
