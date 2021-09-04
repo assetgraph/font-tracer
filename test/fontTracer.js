@@ -29,7 +29,7 @@ expect.addAssertion(
         asset
       ),
       getCssRulesByProperty,
-      htmlAsset: asset,
+      asset,
     });
 
     expect(traces, 'to [exhaustively] satisfy', result);
