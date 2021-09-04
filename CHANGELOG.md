@@ -1,3 +1,31 @@
+### v3.0.0 (2021-09-04)
+
+#### Pull requests
+
+- [#120](https://github.com/assetgraph/font-tracer/pull/120) Upgrade sinon to version 11.1.1 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#121](https://github.com/assetgraph/font-tracer/pull/121) Upgrade eslint-plugin-mocha to version 9.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#111](https://github.com/assetgraph/font-tracer/pull/111) Upgrade puppeteer to version 9.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#109](https://github.com/assetgraph/font-tracer/pull/109) Upgrade subfont to version 6.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#100](https://github.com/assetgraph/font-tracer/pull/100) Upgrade sinon to version 10.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#92](https://github.com/assetgraph/font-tracer/pull/92) Upgrade puppeteer to version 8.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#86](https://github.com/assetgraph/font-tracer/pull/86) Upgrade magicpen-prism to version 5.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#82](https://github.com/assetgraph/font-tracer/pull/82) Upgrade puppeteer to version 7.0.1 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#80](https://github.com/assetgraph/font-tracer/pull/80) Upgrade puppeteer to version 6.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#56](https://github.com/assetgraph/font-tracer/pull/56) Upgrade eslint-config-standard to version 16.0.2 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#66](https://github.com/assetgraph/font-tracer/pull/66) Upgrade eslint-config-prettier to version 7.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#62](https://github.com/assetgraph/font-tracer/pull/62) Upgrade eslint-plugin-standard to version 5.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#49](https://github.com/assetgraph/font-tracer/pull/49) Upgrade eslint-config-standard to version 15.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#45](https://github.com/assetgraph/font-tracer/pull/45) Upgrade eslint-plugin-mocha to version 8.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+
+#### Commits to master
+
+- [Support font-{family,weight,style,variant,stretch} attributes in SVG](https://github.com/assetgraph/font-tracer/commit/f2f6bd0d9aa7e7f5be9c68ba8a01e0671e556f2f) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Breaking change: htmlAsset =&gt; asset](https://github.com/assetgraph/font-tracer/commit/3756e3325012426a39549c03e36294d7c807a98f) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Add support for tracing text out of SVG DOMs](https://github.com/assetgraph/font-tracer/commit/4750c79df47adbe1e5ff51491243d3f6c0f0eaf0) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Also trace font-variant and font-stretch by default](https://github.com/assetgraph/font-tracer/commit/67f17a622300b26f948aa5cbfa4ba45853f6ed4a) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [prettier --write '\*\*\/\*.{js,json,md}'](https://github.com/assetgraph/font-tracer/commit/3cbf3baa89641f912b5a0b1e038e9799a8e67ef5) ([Andreas Lind](mailto:andreas.lind@workday.com))
+- [+13 more](https://github.com/assetgraph/font-tracer/compare/v2.0.1...v3.0.0)
+
 ### v2.0.1 (2020-07-04)
 
 #### Pull requests
@@ -110,5 +138,4 @@
 - [Set mocha's timeout to 30s](https://github.com/assetgraph/font-tracer/commit/690cbbf6e80966d75603d6b2c2cdb3ba96088916) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
 - [Whip up a test of the browser build](https://github.com/assetgraph/font-tracer/commit/d00ae71c40c94918c88743179d468f3ef3555d1a) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
 - [Fix browser build](https://github.com/assetgraph/font-tracer/commit/0faad5c0d2aae119946609d3e973521fd7ab98d0) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
-- [+14 more](https://github.com/assetgraph/font-tracer/compare/849242bd47dab636e3fd99c0c7d620baf143ea52%5E...v1.0.0)
-
+- [+14 more](https://github.com/assetgraph/font-tracer/compare/0faad5c0d2aae119946609d3e973521fd7ab98d0...v1.0.0)
