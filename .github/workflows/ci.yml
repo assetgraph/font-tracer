@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: npm install
-      - run: npm test
+      - run: npm run test:ci
 
   test-targets:
     runs-on: ubuntu-18.04
