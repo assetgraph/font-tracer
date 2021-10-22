@@ -1,4 +1,20 @@
-### v3.0.0 (2021-09-04)
+### v3.0.1 (2021-10-22)
+
+#### Pull requests
+
+- [#153](https://github.com/assetgraph/font-tracer/pull/153) Upgrade puppeteer to version 10.4.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#165](https://github.com/assetgraph/font-tracer/pull/165) Upgrade eslint-plugin-promise to version 5.1.1 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+
+#### Commits to master
+
+- [Update eslint and eslint-plugin-import](https://github.com/assetgraph/font-tracer/commit/8a8fc488074283084e5a0f7ca77918abf77911df) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Fix test](https://github.com/assetgraph/font-tracer/commit/ff35d34da147c8ee315830f1a26cc8f205713cbc) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Try with a prepare script instead](https://github.com/assetgraph/font-tracer/commit/3371d9155d95b39dd22899d95b28c5a294ab931b) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Try switching to test:ci](https://github.com/assetgraph/font-tracer/commit/a797be9160dc2bdd122930232694ea39484542d4) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Disable for node.js 16 due to missing prebuilt canvas](https://github.com/assetgraph/font-tracer/commit/22e78e9f965678c7feb76ddf29b6734896d91a65) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [+4 more](https://github.com/assetgraph/font-tracer/compare/v3.0.0...v3.0.1)
+
+### v3.0.0 (2021-09-05)
 
 #### Pull requests
 
