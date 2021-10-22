@@ -521,7 +521,7 @@ describe('fontTracer', function () {
         '<style>input { font-family: font1; }</style>',
         '<input value="type:undefined">',
         '<input type="date" value="2017-12-03">',
-        '<input type="datetime-local" value="2017-12-03T11:22:33">',
+        '<input type="datetime-local" value="2017-12-03T11:22">',
         '<input type="email" value="foo@example.com">',
         '<input type="month" value="2017-12">',
         '<input type="number" value="1234">',
