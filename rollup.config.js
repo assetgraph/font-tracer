@@ -8,6 +8,6 @@ module.exports = {
     }),
     require('rollup-plugin-node-globals')(),
     // https://gist.github.com/tivac/d3dd0142e7c52d0d0a5a05b6686340e3
-    require('./rollup-plugin-postcss')(),
+    require('rollup-plugin-postcss')(),
   ],
 };
