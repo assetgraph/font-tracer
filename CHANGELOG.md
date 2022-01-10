@@ -1,3 +1,20 @@
+### v3.1.0 (2022-01-10)
+
+#### Pull requests
+
+- [#181](https://github.com/assetgraph/font-tracer/pull/181) Upgrade puppeteer to version 13.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#180](https://github.com/assetgraph/font-tracer/pull/180) Upgrade eslint-plugin-mocha to version 10.0.1 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#176](https://github.com/assetgraph/font-tracer/pull/176) Upgrade prettier to version 2.5.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#178](https://github.com/assetgraph/font-tracer/pull/178) Upgrade puppeteer to version 12.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#169](https://github.com/assetgraph/font-tracer/pull/169) Upgrade sinon to version 12.0.1 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#168](https://github.com/assetgraph/font-tracer/pull/168) Upgrade puppeteer to version 11.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+
+#### Commits to master
+
+- [Update counteraction to ^1.3.1](https://github.com/assetgraph/font-tracer/commit/81969a8e36a6924d56d0539dfb0d2a88c8ae4cb4) ([Andreas Lind](mailto:andreas.lind@workday.com))
+- [Replace test\/mocha.opts with .mocharc.yml](https://github.com/assetgraph/font-tracer/commit/4164e58c0984293516ffe2b1644956beb2e28596) ([Andreas Lind](mailto:andreas.lind@workday.com))
+- [Use a generator to visit all declarations in scope to avoid excessive copying in getComputedStyle](https://github.com/assetgraph/font-tracer/commit/9a7655f24d845ba5fd3f3142c3e194790724217b) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+
 ### v3.0.1 (2021-10-22)
 
 #### Pull requests
