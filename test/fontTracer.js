@@ -2805,7 +2805,7 @@ describe('fontTracer', function () {
 
     it('should pick up all values of font-style used in an animation', function () {
       const htmlText = [
-        '<style>@keyframes foo { 50% { font-style: oblique } 100% { font-style: italic } }</style>',
+        '<style>@keyframes foo { 50% { font-style: oblique; } 100% { font-style: italic; } }</style>',
         '<style>h1 { font-style: normal; animation-name: foo; }</style>',
         '<h1>bar</h1>',
       ].join('');
@@ -4456,8 +4456,8 @@ describe('fontTracer', function () {
     describe('combined with CSS animations', function () {
       it('should pick up all values of font-style used in an animation', function () {
         const htmlText = [
-          '<style>:root { --my-font-style: normal }</style>',
-          '<style>@keyframes foo { 50% { --my-font-style: oblique } 100% { --my-font-style: italic } }</style>',
+          '<style>:root { --my-font-style: normal; }</style>',
+          '<style>@keyframes foo { 50% { --my-font-style: oblique; } 100% { --my-font-style: italic; } }</style>',
           '<style>h1 { font-style: var(--my-font-style); animation-name: foo; }</style>',
           '<h1>bar</h1>',
         ].join('');
