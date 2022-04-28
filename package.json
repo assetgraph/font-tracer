@@ -28,7 +28,7 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "sinon": "^13.0.0",
     "subfont": "^6.2.0",
-    "unexpected": "^12.0.0",
+    "unexpected": "^13.0.0",
     "unexpected-dom": "^5.0.0",
     "unexpected-resemble": "^5.0.0",
     "unexpected-sinon": "^11.0.0",
