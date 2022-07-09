@@ -48,7 +48,7 @@
     "coverage": "NODE_ENV=test nyc --reporter=lcov --reporter=text --all -- mocha --reporter dot && echo google-chrome coverage/lcov-report/index.html",
     "prepublishOnly": "npm run dist",
     "dist": "rm -fr dist && mkdir dist && rollup --config rollup.config.js --sourcemap --format umd --name fontTracer -o dist/fontTracer.browser.js index.browser.js",
-    "preversion": "offline-github-changelog --next=${npm_package_version} > CHANGELOG.md && git add CHANGELOG.md"
+    "preversion": "offline-github-changelog --next=${npm_new_version} > CHANGELOG.md && git add CHANGELOG.md"
   },
   "dependencies": {
     "capitalize": "^2.0.3",
