@@ -1,4 +1,22 @@
-### v3.1.0 (2022-01-10)
+### v3.2.0 (2022-07-09)
+
+#### Pull requests
+
+- [#201](https://github.com/assetgraph/font-tracer/pull/201) Upgrade puppeteer to version 15.1.1 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#200](https://github.com/assetgraph/font-tracer/pull/200) Upgrade prettier to version 2.7.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#197](https://github.com/assetgraph/font-tracer/pull/197) Upgrade puppeteer to version 14.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#196](https://github.com/assetgraph/font-tracer/pull/196) Upgrade sinon to version 14.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#195](https://github.com/assetgraph/font-tracer/pull/195) Upgrade unexpected to version 13.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#185](https://github.com/assetgraph/font-tracer/pull/185) Upgrade sinon to version 13.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+
+#### Commits to master
+
+- [Avoid a combinatorial explosion of predicates when many custom CSS properties unrelated to fonts are in play. https:\/\/github.com\/Munter\/subfont\/issues\/159](https://github.com/assetgraph/font-tracer/commit/50e385350340236b08511ff2ac6048d7c6dccd54) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Try to fix broken tests](https://github.com/assetgraph/font-tracer/commit/4e84cfeb13c434f54479c8ae7da6443b9ea01a3c) ([Andreas Lind](mailto:andreas.lind@workday.com))
+- [npm i --save-dev eslint-plugin-n && npm uninstall eslint-plugin-node && npm i --save-dev eslint@latest](https://github.com/assetgraph/font-tracer/commit/0376b535a7b231bf8482d1aa1bb4e1c6c4670430) ([Andreas Lind](mailto:andreas.lind@workday.com))
+- [Update eslint-config-standard to version 17.0.0](https://github.com/assetgraph/font-tracer/commit/5fd38f460baf0c35c7040ac6137a41f78520cb9c) ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+
+### v3.1.0 (2022-01-11)
 
 #### Pull requests
 
@@ -99,7 +117,7 @@
 
 ### v1.3.2 (2019-11-19)
 
-- [#28](https://github.com/assetgraph/font-tracer/pull/28) Move the counter-related stuff into a separate package ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [#28](https://github.com/assetgraph/font-tracer/pull/28) Move the counter-related stuff into a separate package ([Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com))
 
 ### v1.3.0 (2019-11-16)
 
@@ -123,7 +141,7 @@
 - [#26](https://github.com/assetgraph/font-tracer/pull/26) Upgrade puppeteer to version 2.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
 - [#24](https://github.com/assetgraph/font-tracer/pull/24) Upgrade eslint-plugin-node to version 10.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
 - [#23](https://github.com/assetgraph/font-tracer/pull/23) Upgrade eslint-config-standard to version 14.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
-- [#22](https://github.com/assetgraph/font-tracer/pull/22) Upgrade assetgraph to version 6.0.0 ([Andreas Lind](mailto:andreaslindpetersen@gmail.com), [depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#22](https://github.com/assetgraph/font-tracer/pull/22) Upgrade assetgraph to version 6.0.0 ([Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
 - [#21](https://github.com/assetgraph/font-tracer/pull/21) Upgrade eslint-plugin-mocha to version 6.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
 - [#20](https://github.com/assetgraph/font-tracer/pull/20) Upgrade eslint-config-standard to version 13.0.1 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
 - [#18](https://github.com/assetgraph/font-tracer/pull/18) Upgrade eslint-config-prettier to version 6.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
@@ -151,7 +169,7 @@
 
 #### Pull requests
 
-- [#1](https://github.com/assetgraph/font-tracer/pull/1) Include node in trace ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [#1](https://github.com/assetgraph/font-tracer/pull/1) Include node in trace ([Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com))
 
 #### Commits to master
 
