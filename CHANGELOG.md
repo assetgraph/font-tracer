@@ -1,3 +1,14 @@
+### v3.3.0 (2022-08-07)
+
+#### Pull requests
+
+- [#203](https://github.com/assetgraph/font-tracer/pull/203) Upgrade puppeteer to version 16.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+
+#### Commits to master
+
+- [Trace the ::marker pseudo element Fixes Munter\/subfont\#166](https://github.com/assetgraph/font-tracer/commit/18c6902c72c476ebfe062d757e1b8f4b2fdb1f87) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Fix CHANGELOG generation in preversion script now that an npm env var changed](https://github.com/assetgraph/font-tracer/commit/c9a7e7684644953b7046b555342ae8ee38dc136c) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+
 ### v3.2.0 (2022-07-09)
 
 #### Pull requests
