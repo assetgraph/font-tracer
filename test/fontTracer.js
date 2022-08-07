@@ -2370,6 +2370,118 @@ describe('fontTracer', function () {
         },
       ]);
     });
+
+    describe('and the ::marker pseudo class', function () {
+      describe('without content', function () {
+        it('should apply the ::marker styling to the list-style-type and also include a fallback trace for browsers that do not support ::marker', function () {
+          const htmlText = [
+            '<style>ol li::marker { font-family: font1; font-weight: 700; }</style>',
+            '<ol><li>foo</li></ol>',
+          ].join('');
+
+          return expect(htmlText, 'to satisfy computed font properties', [
+            {
+              text: '1.', // ol defaults to list-style-type: decimal
+              props: {
+                'font-family': undefined,
+                'font-weight': 'normal',
+                'font-style': 'normal',
+              },
+            },
+            {
+              text: 'foo',
+              props: {
+                'font-family': undefined,
+                'font-weight': 'normal',
+                'font-style': 'normal',
+              },
+            },
+            {
+              text: '1.', // ol defaults to list-style-type: decimal
+              pseudoElementName: 'marker',
+              props: {
+                'font-family': 'font1',
+                'font-weight': '700',
+                'font-style': 'normal',
+              },
+            },
+          ]);
+        });
+
+        it('should not apply the ::marker styling to a node that does not have display: list-item', function () {
+          const htmlText = [
+            '<style>ol li { display: block } ol li::marker { font-family: font1; font-weight: 700; }</style>',
+            '<ol><li>foo</li></ol>',
+          ].join('');
+
+          return expect(htmlText, 'to satisfy computed font properties', [
+            {
+              text: 'foo',
+              props: {
+                'font-family': undefined,
+                'font-weight': 'normal',
+                'font-style': 'normal',
+              },
+            },
+          ]);
+        });
+      });
+
+      describe('with content', function () {
+        it('should apply the ::marker styling to the content  and also include a fallback trace for browsers that do not support ::marker', function () {
+          const htmlText = [
+            '<style>ol li::marker { font-family: font1; font-weight: 700; content: "\\2713"; }</style>',
+            '<ol><li>foo</li></ol>',
+          ].join('');
+
+          return expect(htmlText, 'to satisfy computed font properties', [
+            {
+              text: '1.', // ol defaults to list-style-type: decimal
+              props: {
+                'font-family': undefined,
+                'font-weight': 'normal',
+                'font-style': 'normal',
+              },
+            },
+            {
+              text: 'foo',
+              props: {
+                'font-family': undefined,
+                'font-weight': 'normal',
+                'font-style': 'normal',
+              },
+            },
+            {
+              text: '✓',
+              pseudoElementName: 'marker',
+              props: {
+                'font-family': 'font1',
+                'font-weight': '700',
+                'font-style': 'normal',
+              },
+            },
+          ]);
+        });
+
+        it('should not apply the ::marker styling to a node that does not have display: list-item', function () {
+          const htmlText = [
+            '<style>ol li { display: block } ol li::marker { font-family: font1; font-weight: 700; content: "\\2713"; }</style>',
+            '<ol><li>foo</li></ol>',
+          ].join('');
+
+          return expect(htmlText, 'to satisfy computed font properties', [
+            {
+              text: 'foo',
+              props: {
+                'font-family': undefined,
+                'font-weight': 'normal',
+                'font-style': 'normal',
+              },
+            },
+          ]);
+        });
+      });
+    });
   });
 
   describe('CSS pseudo selectors', function () {
