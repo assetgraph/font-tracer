@@ -4793,7 +4793,7 @@ describe('fontTracer', function () {
             text: 'Hello',
             props: {
               'font-family': 'foo',
-              'font-variation-settings': undefined,
+              'font-variation-settings': 'normal',
             },
           },
           {
