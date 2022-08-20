@@ -1,3 +1,7 @@
+### v3.4.1 (2022-08-20)
+
+- [Make font-variation-settings come out as 'normal' instead of undefined per default](https://github.com/assetgraph/font-tracer/commit/27c8817d47b29c4de19402d7fba1edc394e90099) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+
 ### v3.4.0 (2022-08-20)
 
 - [Trace font-variation-settings by default](https://github.com/assetgraph/font-tracer/commit/b822b2f84406245cadd45b0bf2234eca0681e24f) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
