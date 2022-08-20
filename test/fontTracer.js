@@ -4732,6 +4732,89 @@ describe('fontTracer', function () {
     });
   });
 
+  describe('with font-variation-settings', function () {
+    it('should trace a directly applied value', function () {
+      const htmlText = [
+        '<style>div { font-family: foo; font-variation-settings: "fooo" 1000, "quux" 123; }</style>',
+        '<body><div>Hello</div></body>',
+      ].join('');
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'Hello',
+          props: {
+            'font-family': 'foo',
+            'font-variation-settings': '"fooo" 1000, "quux" 123',
+          },
+        },
+      ]);
+    });
+
+    it('should be inherited from the parent element when not directly applied', function () {
+      const htmlText = [
+        '<style>div { font-family: foo; font-variation-settings: "fooo" 1000, "quux" 123; }</style>',
+        '<body><div><span>Hello</span></div></body>',
+      ].join('');
+
+      return expect(htmlText, 'to satisfy computed font properties', [
+        {
+          text: 'Hello',
+          props: {
+            'font-family': 'foo',
+            'font-variation-settings': '"fooo" 1000, "quux" 123',
+          },
+        },
+      ]);
+    });
+
+    describe('being used in a CSS animation', function () {
+      it('should trace the value from each keyframe', function () {
+        const htmlText = [
+          `<style>
+            div {
+              font-family: foo;
+              animation: 5s linear infinite alternate myanimation;
+            }
+
+            @keyframes myanimation {
+              0% {
+                font-variation-settings: "quux" 0;
+              }
+              100% {
+                font-variation-settings: "quux" 1000;
+              }
+            }
+          </style>`,
+          '<body><div>Hello</div></body>',
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'Hello',
+            props: {
+              'font-family': 'foo',
+              'font-variation-settings': undefined,
+            },
+          },
+          {
+            text: 'Hello',
+            props: {
+              'font-family': 'foo',
+              'font-variation-settings': '"quux" 0',
+            },
+          },
+          {
+            text: 'Hello',
+            props: {
+              'font-family': 'foo',
+              'font-variation-settings': '"quux" 1000',
+            },
+          },
+        ]);
+      });
+    });
+  });
+
   it('should include the predicates for each traced text', function () {
     const htmlText = [
       "<style>:root { --my-prop: 'the value'; }</style>",
