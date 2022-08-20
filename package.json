@@ -1,6 +1,6 @@
 {
   "name": "font-tracer",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Trace text and the associated font-related CSS properties in a DOM",
   "repository": "git://github.com/assetgraph/font-tracer.git",
   "main": "lib/fontTracer.js",

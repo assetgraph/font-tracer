@@ -1,3 +1,8 @@
+### v3.4.0 (2022-08-20)
+
+- [Trace font-variation-settings by default](https://github.com/assetgraph/font-tracer/commit/b822b2f84406245cadd45b0bf2234eca0681e24f) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Fix: Use all of propsToReturn when deduplicating](https://github.com/assetgraph/font-tracer/commit/05e4d2759c2fd5beca39f86695adcc45548a3b3e) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+
 ### v3.3.0 (2022-08-07)
 
 #### Pull requests
