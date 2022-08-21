@@ -3945,6 +3945,27 @@ describe('fontTracer', function () {
     ]);
   });
 
+  describe('with calc(...)', function () {
+    describe('and a trivially computable expression', function () {
+      it('should replace the calc(...) with the result', function () {
+        const htmlText = [
+          '<style>div { font-weight: calc(123 + 577); }</style><div>foo</div>',
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'foo',
+            props: {
+              'font-family': undefined,
+              'font-style': 'normal',
+              'font-weight': '700',
+            },
+          },
+        ]);
+      });
+    });
+  });
+
   describe('with CSS custom properties', function () {
     it('should pick up variable values defined for :root', async function () {
       await expect(
@@ -4730,6 +4751,35 @@ describe('fontTracer', function () {
         { text: '161820' },
       ]);
     });
+
+    describe('combined with calc(...)', function () {
+      it('should calculate each hypothetical value', function () {
+        const htmlText = [
+          '<html><head>',
+          '<style>:root { --my-font-weight-adjustment: 100; }</style>',
+          '<style>@media screen { :root { --my-font-weight-adjustment: 200; } }</style>',
+          '<style>div { font-family: font1; font-weight: calc(400 + var(--my-font-weight-adjustment, 0)) }</style>',
+          '</head><body>',
+          '<div>Hey</div>',
+          '</body></html>',
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'Hey',
+            props: {
+              'font-weight': '600',
+            },
+          },
+          {
+            text: 'Hey',
+            props: {
+              'font-weight': '500',
+            },
+          },
+        ]);
+      });
+    });
   });
 
   describe('with font-variation-settings', function () {
@@ -4808,6 +4858,25 @@ describe('fontTracer', function () {
             props: {
               'font-family': 'foo',
               'font-variation-settings': '"quux" 1000',
+            },
+          },
+        ]);
+      });
+    });
+
+    describe('containing calc(...)', function () {
+      it('should evalulate simple expressions', function () {
+        const htmlText = [
+          '<style>div { font-family: foo; font-variation-settings: "fooo" calc(100 + 200), "quux" calc(500 - 200); }</style>',
+          '<body><div><span>Hello</span></div></body>',
+        ].join('');
+
+        return expect(htmlText, 'to satisfy computed font properties', [
+          {
+            text: 'Hello',
+            props: {
+              'font-family': 'foo',
+              'font-variation-settings': '"fooo" 300, "quux" 300',
             },
           },
         ]);
