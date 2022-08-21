@@ -1,3 +1,10 @@
+### v3.5.0 (2022-08-21)
+
+- [Implement primitive expansion of calc\(...\)](https://github.com/assetgraph/font-tracer/commit/b983fe915e29e6d6c43fc70dcfe28bf4afeeb905) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Add postcssValueVarNodeGenerator \(missing from previous commit\)](https://github.com/assetgraph/font-tracer/commit/c0c8c90bf383d5dad1d451dc6008d39e8ca57c87) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Deal with custom properties referenced inside other CSS functions, eg. calc](https://github.com/assetgraph/font-tracer/commit/65dd7e6dda6063008380ca9e7e7ea397e8a61c11) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Fix typo in test description](https://github.com/assetgraph/font-tracer/commit/4a4e5d62a6f7ed46ff4052f6d99e6d3b03efca3d) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+
 ### v3.4.1 (2022-08-20)
 
 - [Make font-variation-settings come out as 'normal' instead of undefined per default](https://github.com/assetgraph/font-tracer/commit/27c8817d47b29c4de19402d7fba1edc394e90099) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
