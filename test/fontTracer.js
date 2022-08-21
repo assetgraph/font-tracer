@@ -4190,7 +4190,7 @@ describe('fontTracer', function () {
       );
     });
 
-    it('should trace all variants when a custom property my multiple hypothetical values is used to define another one', async function () {
+    it('should trace all variants when a custom property with multiple hypothetical values is used to define another one', async function () {
       await expect(
         `
           <style>
