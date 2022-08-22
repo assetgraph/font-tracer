@@ -1,4 +1,8 @@
-### v3.5.0 (2022-08-21)
+### v3.5.1 (2022-08-22)
+
+- [Switch to reduce-css-calc to unbreak the browser build and reduce the amount of dependencies](https://github.com/assetgraph/font-tracer/commit/d380e8a3fb2e459729ea2c246d4db8682c07846f) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+
+### v3.5.0 (2022-08-22)
 
 - [Implement primitive expansion of calc\(...\)](https://github.com/assetgraph/font-tracer/commit/b983fe915e29e6d6c43fc70dcfe28bf4afeeb905) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
 - [Add postcssValueVarNodeGenerator \(missing from previous commit\)](https://github.com/assetgraph/font-tracer/commit/c0c8c90bf383d5dad1d451dc6008d39e8ca57c87) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
