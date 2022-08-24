@@ -2844,7 +2844,7 @@ describe('fontTracer', function () {
         {
           text: 'foo',
           props: {
-            'font-family': '"famfam"',
+            'font-family': 'famfam',
             'font-weight': 'bold',
             'font-style': 'normal',
           },
@@ -2862,7 +2862,7 @@ describe('fontTracer', function () {
         {
           text: 'foo',
           props: {
-            'font-family': '"famfam"',
+            'font-family': 'famfam',
             'font-weight': 'normal',
             'font-style': 'normal',
           },
