@@ -4194,7 +4194,7 @@ describe('fontTracer', function () {
           {
             text: 'quux',
             props: {
-              'font-family': undefined,
+              'font-family': '',
               'font-style': 'normal',
               'font-weight': 'normal',
             },
@@ -4426,7 +4426,7 @@ describe('fontTracer', function () {
           {
             text: 'quux',
             props: {
-              'font-family': undefined,
+              'font-family': '',
               'font-style': 'normal',
               'font-weight': 'normal',
             },
@@ -5406,7 +5406,7 @@ describe('fontTracer', function () {
             text: 'Hello, world!',
             props: {
               'font-family': undefined,
-              'font-style': undefined,
+              'font-style': 'normal',
             },
           },
           // Whitespace from <html> and <body>:
