@@ -1,3 +1,9 @@
+### v3.6.0 (2022-08-25)
+
+- [Trace animation-timing-function](https://github.com/assetgraph/font-tracer/commit/422b72a060436e1b5e0d7ffbdb84eaf0bb5134e8) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Fix build after unexpected 13.0.1 got released](https://github.com/assetgraph/font-tracer/commit/0438bdffd3c6d988d2fb1976f32dd61a0647b72a) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+- [Back to the unforked css-font-parser https:\/\/gitter.im\/assetgraph\/assetgraph?at=62fe82bd7ccf6b6d454d02a4](https://github.com/assetgraph/font-tracer/commit/b09ac3753e91a6924410e8add038cfb5a42384fa) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+
 ### v3.5.1 (2022-08-22)
 
 - [Switch to reduce-css-calc to unbreak the browser build and reduce the amount of dependencies](https://github.com/assetgraph/font-tracer/commit/d380e8a3fb2e459729ea2c246d4db8682c07846f) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
