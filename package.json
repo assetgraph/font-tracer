@@ -20,7 +20,7 @@
     "nyc": "^15.1.0",
     "offline-github-changelog": "^3.0.0",
     "prettier": "~2.7.0",
-    "puppeteer": "^18.0.5",
+    "puppeteer": "^19.2.0",
     "rollup": "^2.18.2",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-json": "^4.0.0",
