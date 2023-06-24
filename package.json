@@ -58,7 +58,7 @@
     "css-font-weight-names": "^0.2.1",
     "postcss-value-parser": "^4.1.0",
     "reduce-css-calc": "^2.1.8",
-    "specificity": "^0.4.1"
+    "specificity": "^1.0.0"
   },
   "nyc": {
     "include": [
