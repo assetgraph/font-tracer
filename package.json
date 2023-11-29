@@ -29,7 +29,7 @@
     "sinon": "^15.0.0",
     "subfont": "^7.0.0",
     "unexpected": "^13.0.0",
-    "unexpected-dom": "^5.0.0",
+    "unexpected-dom": "^6.0.1",
     "unexpected-resemble": "^5.0.0",
     "unexpected-sinon": "^11.0.0",
     "urltools": "^0.4.1",
