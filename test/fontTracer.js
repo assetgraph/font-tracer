@@ -252,6 +252,25 @@ describe('fontTracer', function () {
     ]);
   });
 
+  // https://github.com/Munter/subfont/issues/173
+  it('should foo', function () {
+    const htmlText = [
+      '<style>.font-family\\:default {font-family: foo;}</style>',
+      '<h1 class="font-family:default">text</h1>',
+    ].join('');
+
+    return expect(htmlText, 'to satisfy computed font properties', [
+      {
+        text: 'text',
+        props: {
+          'font-family': 'foo',
+          'font-weight': 'bold',
+          'font-style': 'normal',
+        },
+      },
+    ]);
+  });
+
   it('should return font-weight as a string', function () {
     const htmlText = '<style>body { font-weight: 500; }</style>text';
 

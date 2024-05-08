@@ -39,4 +39,8 @@ describe('stripPseudoClassesFromSelector', function () {
   it('should replace multiple consecutive pseudo class selectors directly following a selector with nothing', function () {
     expect(strip('div:hover:focus:visited'), 'to be', 'div');
   });
+
+  it('should not strip when the colon is escaped by a backslash', function () {
+    expect(strip('div\\:hover'), 'to be', 'div\\:hover');
+  });
 });
