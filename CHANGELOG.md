@@ -1,4 +1,22 @@
-### v3.6.0 (2022-08-25)
+### v3.7.0 (2024-05-08)
+
+#### Pull requests
+
+- [#229](https://github.com/assetgraph/font-tracer/pull/229) Upgrade puppeteer to version 20.1.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#225](https://github.com/assetgraph/font-tracer/pull/225) Upgrade subfont to version 7.0.0 ([Andreas Lind](mailto:andreaslindpetersen@gmail.com), [depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#218](https://github.com/assetgraph/font-tracer/pull/218) Upgrade sinon to version 15.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#217](https://github.com/assetgraph/font-tracer/pull/217) Upgrade prettier to version 2.8.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#214](https://github.com/assetgraph/font-tracer/pull/214) Upgrade puppeteer to version 19.2.2 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#216](https://github.com/assetgraph/font-tracer/pull/216) Upgrade rollup to version 3.3.0 ([Andreas Lind](mailto:andreaslindpetersen@gmail.com), [Andreas Lind](mailto:andreaslindpetersen@gmail.com), [depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#210](https://github.com/assetgraph/font-tracer/pull/210) Upgrade offline-github-changelog to version 3.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#205](https://github.com/assetgraph/font-tracer/pull/205) Upgrade puppeteer to version 18.0.5 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+- [#204](https://github.com/assetgraph/font-tracer/pull/204) Upgrade puppeteer to version 17.0.0 ([depfu[bot]](mailto:23717796+depfu[bot]@users.noreply.github.com))
+
+#### Commits to master
+
+- [Don't strip pseudo classes that are preceded by a backslash](https://github.com/assetgraph/font-tracer/commit/f270b9d81381f189949c2d2f4badda4be5daf1df) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+
+### v3.6.0 (2022-08-26)
 
 - [Trace animation-timing-function](https://github.com/assetgraph/font-tracer/commit/422b72a060436e1b5e0d7ffbdb84eaf0bb5134e8) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
 - [Fix build after unexpected 13.0.1 got released](https://github.com/assetgraph/font-tracer/commit/0438bdffd3c6d988d2fb1976f32dd61a0647b72a) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
