@@ -43,4 +43,20 @@ describe('stripPseudoClassesFromSelector', function () {
   it('should not strip when the colon is escaped by a backslash', function () {
     expect(strip('div\\:hover'), 'to be', 'div\\:hover');
   });
+
+  it('should strip when the colon is escaped by a backslash that is itself escaped', function () {
+    expect(strip('div\\\\:hover'), 'to be', 'div\\\\');
+  });
+
+  it('should not strip when the colon is escaped by a backslash that is preceded by an escaped backslash', function () {
+    expect(strip('div\\\\\\:hover'), 'to be', 'div\\\\\\:hover');
+  });
+
+  it('should strip when the colon is escaped by two backslashes that are themselves escaped', function () {
+    expect(strip('div\\\\\\\\:hover'), 'to be', 'div\\\\\\\\');
+  });
+
+  it('should not strip when the colon is escaped by a backslash that is preceded by two escaped backslashes', function () {
+    expect(strip('div\\\\\\\\\\:hover'), 'to be', 'div\\\\\\\\\\:hover');
+  });
 });
