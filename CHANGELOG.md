@@ -1,3 +1,7 @@
+### v3.7.1 (2024-05-08)
+
+- [Deal with unescaped colons preceded by escaped backslashes when stripping pseudo classes](https://github.com/assetgraph/font-tracer/commit/5c3f1bfb83d89cdba7bc0430df1f315aba0097c9) ([Andreas Lind](mailto:andreaslindpetersen@gmail.com))
+
 ### v3.7.0 (2024-05-08)
 
 #### Pull requests
